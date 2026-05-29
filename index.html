@@ -207,7 +207,7 @@
         </article>
 
         <div style="display: flex; gap: 15px; margin-top: 34px;">
-            <button id="generateCustomerPdfBtn" class="button" style="background: #2D2D2D; border: 2px solid var(--accent); box-shadow: none; width: 50%;">Customer Checklist PDF Coming Soon</button>
+            <button id="generateCustomerPdfBtn" class="button" style="background: #2D2D2D; border: 2px solid var(--accent); box-shadow: none; width: 50%;">Customer Checklist PDF</button>
             <button id="generateInternalPdfBtn" class="button" style="width: 50%;">Full Survey PDF</button>
         </div>
         <button id="resetFormBtn" class="button btn-danger" style="margin-top: 20px; width: 100%;">Clear Form for Next Appointment</button>
@@ -304,13 +304,35 @@
         <img class="brand-logo-img" src="logo.jpg" style="max-height: 120px; margin-bottom: 20px;">
         <h1 style="color: #0F3759; margin-bottom: 5px; font-size: 32px; letter-spacing: 1px;">PREDESIGN SURVEY REPORT</h1>
         
+        <div style="page-break-after: always; text-align: left; padding: 20px 40px; font-size: 15px; line-height: 1.6; color: #333;">
+            <p id="lp-greeting" style="margin-bottom: 20px;"></p>
+            <p id="lp-size" style="margin-bottom: 20px;"></p>
+            <p id="lp-roof" style="margin-bottom: 20px;"></p>
+            <p id="lp-frame" style="margin-bottom: 20px;"></p>
+            <p id="lp-compliance" style="margin-bottom: 20px;"></p>
+            <p id="lp-revisit" style="margin-bottom: 30px;"></p>
+            
+            <p style="margin-bottom: 5px;">Best regards,</p>
+            <p style="margin-bottom: 0px; font-weight: bold; font-size: 16px; color: #0F3759;" id="lp-designer-name"></p>
+            <p style="margin-top: 0px; color: #666;">Design Consultant</p>
+            <p style="margin-top: 10px; font-size: 14px;" id="lp-designer-contact"></p>
+        </div>
+
         <div style="width: 100%; max-width: 650px; height: 400px; margin: 30px auto; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: #f9f9f9;">
             <img id="pdfImgCustomer-frontelevation" style="width: 100%; height: 100%; object-fit: contain;">
-        <!-- ========================================== -->
-        <!-- CUSTOMER PAMPHLET LIBRARY                  -->
-        <!-- ========================================== -->
-        
-        <!-- ALWAYS ON: COHI Who We Are -->
+        </div> <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 25px; border-radius: 8px; max-width: 500px; margin: 0 auto 30px; text-align: left; font-size: 16px;">
+            <p style="margin: 0 0 12px 0;"><strong>Customer:</strong> <span class="bind-name"></span></p>
+            <p style="margin: 0 0 12px 0;"><strong>Address:</strong> <span class="bind-address"></span></p>
+            <p style="margin: 0;"><strong>Date:</strong> <span class="bind-date"></span></p>
+        </div>
+
+        <div style="border-top: 2px solid #0F3759; padding-top: 20px; text-align: left; max-width: 650px; margin: 0 auto;">
+            <h3 style="color: #0F3759; margin-top:0;">Next Steps</h3>
+            <p id="pdfDesignerBio" style="font-size: 14px; line-height: 1.6; color: #444;"></p>
+            <p style="margin-top: 20px; font-weight: bold; font-size: 16px;">Your Designer: <span id="pdfDesignerName"></span></p>
+            <p style="margin-top: 5px; font-size: 14px;">Contact: <span id="pdfDesignerContact"></span></p>
+        </div>
+
         <div style="page-break-before: always; text-align: left; padding-top: 20px;">
             <h2 style="color: #0F3759;">The COHI Family: Who We Are</h2>
             <p><strong>Welcome to CO Home Improvements</strong><br>
@@ -324,7 +346,6 @@
             With over 30 years of experience in the home improvement market, it is fair to say that with age comes experience. We have installed every style, size, shape, and design imaginable, making us true experts in our field. With CO Home Improvements, you are not just investing in your home—you are joining a community built on trust, quality, and shared values.</p>
         </div>
 
-        <!-- ALWAYS ON: COHI Why Choose Us -->
         <div style="page-break-before: always; text-align: left; padding-top: 20px;">
             <h2 style="color: #0F3759;">Why Choose Us: Excellence & Peace of Mind</h2>
             <p>We do not just define value by price. Though our prices are some of the most competitive in the home improvement market, we also offer incredible value in the quality of our products, as well as our expert, highly professional service. We keep a close eye on our competitors to ensure we always offer great quality at fair prices, supported by excellent service.</p>
@@ -345,7 +366,6 @@
             </ul>
         </div>
 
-        <!-- ALWAYS ON: Piling -->
         <div style="page-break-before: always; text-align: left; padding-top: 20px;">
             <h2 style="color: #0F3759;">Understanding Your Foundation: Piling</h2>
             <p>Every beautiful, long-lasting living space starts with what lies beneath it. Bringing your dream design to life is an exciting journey, and our first priority is ensuring your new extension or conservatory has a rock-solid, permanent foundation. Because every property is unique, we take a tailored approach to the groundworks beneath your home.</p>
@@ -360,7 +380,6 @@
             Piling provides the ultimate structural security for your property, ensuring your new space will not suffer from subsidence, movement, or cracking over time. Backed by complex structural calculations, it is the gold standard for protecting your investment.</p>
         </div>
 
-        <!-- CONDITIONAL: SAP Calculations -->
         <div id="pamphlet-sap" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
             <h2 style="color: #0F3759;">Energy Efficiency: SAP Calculations</h2>
             <p>One of the most exciting aspects of adding a bespoke living space to your home is the flood of natural light it brings. However, when designing an orangery or a conservatory with expansive glass elements, it is vital to ensure the room remains comfortable all year round—warm in the winter and cool in the summer.</p>
@@ -374,7 +393,6 @@
             Absolutely nothing. Our in-house technical team and independent assessors manage the entire SAP Calculation process on your behalf. We seamlessly integrate these mathematical models into your Building Regulations application, ensuring your project moves forward smoothly without any stress or confusing paperwork on your end.</p>
         </div>
 
-        <!-- CONDITIONAL: Full Planning Permission -->
         <div id="pamphlet-planning-full" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
             <h2 style="color: #0F3759;">Your Project Journey: Full Planning Permission</h2>
             <p>Transforming your property is an exciting milestone, and we are here to guide you through every step. Because every house and every bespoke design is unique, some structures can be built under automatic rights, while others require formal Planning Permission from your local council. Based on our survey today, your beautiful new design will require a full planning application.</p>
@@ -392,7 +410,6 @@
             Timelines will vary according to your local authority, but please allow between 8 to 16 weeks from the submission of the application. While we cannot control the council's internal speed, we closely track the application every step of the way and will keep you fully updated.</p>
         </div>
 
-        <!-- CONDITIONAL: Pre-Approved Planning -->
         <div id="pamphlet-planning-pre" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
             <h2 style="color: #0F3759;">Your Project Journey: Pre-Approved Planning</h2>
             <p>Transforming your property is a wonderful investment. Based on our meticulous survey today, there is great news: your bespoke design has been specifically tailored to fall within the government's "Permitted Development" rights. This means your project avoids the heavier complexities of a full planning application.</p>
@@ -410,7 +427,6 @@
             Our in-house technical team will draft the scaled architectural drawings, submit the application securely to your local authority, and act as your dedicated agent until the certificate is officially issued.</p>
         </div>
 
-        <!-- CONDITIONAL: Cavity Trays -->
         <div id="pamphlet-cavity" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
             <h2 style="color: #0F3759;">Protecting Your Home: What is a Cavity Tray?</h2>
             <p>When designing a new extension that joins seamlessly onto your existing house, ensuring the structure is completely watertight is our highest priority. The Great British weather can be unpredictable, and we want to ensure your beautiful new interior is permanently protected from the elements.</p>
@@ -423,20 +439,6 @@
             In the event that your new living space is particularly exposed to prevailing winds and weather, we may recommend adding a cavity tray. This is highly relevant if your home is situated on the coast, in a rural location, or on top of a hill.</p>
             <p><strong>What if I choose not to install one?</strong><br>
             In many instances, a cavity tray may not be required, but please speak to your building team for more information. However, please be aware that if you are advised that your property requires a cavity tray and you decide not to fit one, some water ingress may occur in severe weather conditions.</p>
-        </div>    
-        </div>
-
-        <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 25px; border-radius: 8px; max-width: 500px; margin: 0 auto 30px; text-align: left; font-size: 16px;">
-            <p style="margin: 0 0 12px 0;"><strong>Customer:</strong> <span class="bind-name"></span></p>
-            <p style="margin: 0 0 12px 0;"><strong>Address:</strong> <span class="bind-address"></span></p>
-            <p style="margin: 0;"><strong>Date:</strong> <span class="bind-date"></span></p>
-        </div>
-
-        <div style="border-top: 2px solid #0F3759; padding-top: 20px; text-align: left; max-width: 650px; margin: 0 auto;">
-            <h3 style="color: #0F3759; margin-top:0;">Next Steps</h3>
-            <p id="pdfDesignerBio" style="font-size: 14px; line-height: 1.6; color: #444;"></p>
-            <p style="margin-top: 20px; font-weight: bold; font-size: 16px;">Your Designer: <span id="pdfDesignerName"></span></p>
-            <p style="margin-top: 5px; font-size: 14px;">Contact: <span id="pdfDesignerContact"></span></p>
         </div>
     </div>
 
