@@ -43,6 +43,8 @@
             <div class="form-group"><label class="form-group__label">Customer Num:</label><input type="tel" id="clientNum" class="form-group__input form-group__input--touch"></div>
             <div class="form-group"><label class="form-group__label">Customer Postcode:</label><input type="text" id="postCode" class="form-group__input form-group__input--touch"></div>
             <div class="form-group"><label class="form-group__label">Date of Appointment:</label><input type="date" id="apptDate" class="form-group__input form-group__input--touch"></div>
+            <div class="form-group"><label class="form-group__label">2nd Appointment Date (Revisit):</label><input type="date" id="revisitDate" class="form-group__input form-group__input--touch"></div>
+            <div class="form-group"><label class="form-group__label">2nd Appointment Location:</label><input type="text" id="revisitLocation" class="form-group__input form-group__input--touch" placeholder="e.g. your address, Our showroom..."></div>
         </article>
 
         <article class="card card--primary">
@@ -161,6 +163,22 @@
                 <select id="frameColour" class="form-group__input form-group__input--touch">
                     <option value="">Select...</option>
                     <option value="White">White</option><option value="Grey Foil on White">Grey Foil on White</option><option value="Grey Foil">Grey Foil</option><option value="Rosewood on White">Rosewood on White</option><option value="Rosewood">Rosewood</option><option value="Light Oak on White">Light Oak on White</option><option value="Light Oak">Light Oak</option><option value="Black Brown Foil on White">Black Brown Foil on White</option><option value="Black Brown Foil">Black Brown Foil</option><option value="Cream Foil on White">Cream Foil on White</option><option value="Cream Foil">Cream Foil</option><option value="Chartwell Green on White">Chartwell Green on White</option><option value="Chartwell Green Foil">Chartwell Green Foil</option><option value="Irish Oak Foil on White">Irish Oak Foil on White</option><option value="Irish Oak Foil">Irish Oak Foil</option><option value="Olive Grey on White">Olive Grey on White</option><option value="Olive Grey">Olive Grey</option><option value="Smooth Grey on White">Smooth Grey on White</option><option value="Smooth Grey Throughout">Smooth Grey Throughout</option><option value="Agate Grey">Agate Grey</option><option value="Agate Grey on White">Agate Grey on White</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-group__label">New Build Material?:</label>
+                <select id="newBuildMaterial" class="form-group__input form-group__input--touch">
+                    <option value="">Select...</option>
+                    <option value="Brick">Brick</option>
+                    <option value="Brick exterior, Block interior">Brick exterior, Block interior</option>
+                    <option value="Block interior, Block & Cement Render exterior">Block interior, Block & Cement Render exterior</option>
+                    <option value="Block interior, Block & K Rend or equivalent exterior">Block interior, Block & K Rend or equivalent exterior</option>
+                    <option value="Block only">Block only</option>
+                    <option value="Artificial Stone exterior, block interior">Artificial Stone exterior, block interior</option>
+                    <option value="Artificial Stone">Artificial Stone</option>
+                    <option value="Natural Stone">Natural Stone</option>
+                    <option value="HUP Wall System">HUP Wall System</option>
                 </select>
             </div>
 
@@ -288,6 +306,124 @@
         
         <div style="width: 100%; max-width: 650px; height: 400px; margin: 30px auto; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: #f9f9f9;">
             <img id="pdfImgCustomer-frontelevation" style="width: 100%; height: 100%; object-fit: contain;">
+        <!-- ========================================== -->
+        <!-- CUSTOMER PAMPHLET LIBRARY                  -->
+        <!-- ========================================== -->
+        
+        <!-- ALWAYS ON: COHI Who We Are -->
+        <div style="page-break-before: always; text-align: left; padding-top: 20px;">
+            <h2 style="color: #0F3759;">The COHI Family: Who We Are</h2>
+            <p><strong>Welcome to CO Home Improvements</strong><br>
+            Choosing to invest in a new conservatory, orangery, or extension is one of the most important decisions you will make for your home. To bring your vision to life, you need a trusted partner equipped with advanced products, first-class installation skills, and an unwavering commitment to quality.</p>
+            <p>CO Home Improvements is a trusted partnership of outstanding local businesses—including West Yorkshire Windows, Trent Valley Windows, Orion Windows, Yorkshire Windows, Clearview, and Planet—working together with one shared purpose: to enhance your home and enrich your life.</p>
+            <div style="height: 200px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: The COHI Brand Family Logos]</div>
+            <p><strong>Local Expertise, National Strength</strong><br>
+            Individually, each company brings years of expertise, craftsmanship, and customer care. Together, we are a powerhouse of home improvement professionals—stronger, smarter, and more dedicated to delivering an exceptional experience from start to finish.</p>
+            <p>We know that improving your home can feel overwhelming, which is why we make it our mission to keep things simple, clear, and stress-free. From your first consultation to final installation, our friendly team is always on hand to communicate, guide, and support you every step of the way.</p>
+            <p><strong>A Community Built on Trust</strong><br>
+            With over 30 years of experience in the home improvement market, it is fair to say that with age comes experience. We have installed every style, size, shape, and design imaginable, making us true experts in our field. With CO Home Improvements, you are not just investing in your home—you are joining a community built on trust, quality, and shared values.</p>
+        </div>
+
+        <!-- ALWAYS ON: COHI Why Choose Us -->
+        <div style="page-break-before: always; text-align: left; padding-top: 20px;">
+            <h2 style="color: #0F3759;">Why Choose Us: Excellence & Peace of Mind</h2>
+            <p>We do not just define value by price. Though our prices are some of the most competitive in the home improvement market, we also offer incredible value in the quality of our products, as well as our expert, highly professional service. We keep a close eye on our competitors to ensure we always offer great quality at fair prices, supported by excellent service.</p>
+            <div style="height: 180px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: High-quality hardware or flawless brickwork]</div>
+            <p><strong>Unmatched Guarantees & Value</strong></p>
+            <ul style="margin-top:0;">
+                <li style="margin-bottom: 8px;"><strong>The Price Promise Challenge:</strong> We are so confident in our value that we offer a strict price promise. Find an equivalent quality uPVC product for less within 7 days and we will match or refund the difference.</li>
+                <li style="margin-bottom: 8px;"><strong>Industry-Leading 20-Year Guarantee:</strong> Once your installation is complete, we provide a comprehensive, insurance-backed guarantee completely free of charge, giving you total confidence in your investment.</li>
+                <li style="margin-bottom: 8px;"><strong>Flexible Funding:</strong> We are fully authorised and regulated by the Financial Conduct Authority (FCA). To make life easy for you, we can arrange a variety of convenient, easy-payment finance options.</li>
+            </ul>
+            <p><strong>Our Industry Accreditations</strong><br>
+            We are independently vetted and held to the absolute highest manufacturing and installation standards in the UK:</p>
+            <ul style="margin-top:0;">
+                <li style="margin-bottom: 5px;"><strong>FENSA Approved:</strong> Ensures all replacement windows and doors meet current building regulations.</li>
+                <li style="margin-bottom: 5px;"><strong>GGF Members:</strong> Operating to the highest technical standards for glass supply and installation.</li>
+                <li style="margin-bottom: 5px;"><strong>ISO 9001 Certified:</strong> Strict, internationally recognised benchmarks for quality management systems.</li>
+                <li style="margin-bottom: 5px;"><strong>Constructionline Gold & CHAS:</strong> Elite memberships recognising our strict commitment to health, safety, and environmental management.</li>
+            </ul>
+        </div>
+
+        <!-- ALWAYS ON: Piling -->
+        <div style="page-break-before: always; text-align: left; padding-top: 20px;">
+            <h2 style="color: #0F3759;">Understanding Your Foundation: Piling</h2>
+            <p>Every beautiful, long-lasting living space starts with what lies beneath it. Bringing your dream design to life is an exciting journey, and our first priority is ensuring your new extension or conservatory has a rock-solid, permanent foundation. Because every property is unique, we take a tailored approach to the groundworks beneath your home.</p>
+            <p><strong>The Crucial "Test Dig"</strong><br>
+            At the beginning of every installation, we conduct a dedicated 'test dig'. The purpose of this is to ascertain your local ground conditions and ensure they are perfectly suitable for a traditional concrete base and foundation. We want to know exactly what we are building on before we lay a single brick.</p>
+            <div style="height: 150px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: Clean, prepared trench or structural piling]</div>
+            <p><strong>What happens if the ground is unstable?</strong><br>
+            Sometimes, we discover that standard trench foundations are not suitable. Where the ground is found to be unsuitable, we will advise on a highly secure, engineered alternative, such as a specialist pile foundation. Ground can be unstable due to large nearby trees drawing moisture from clay-heavy soil, deep peat, loose sand, or previously backfilled areas.</p>
+            <p><strong>What is Piling?</strong><br>
+            Instead of digging a wide, shallow trench, piling involves driving or drilling strong, narrow columns—made of reinforced steel and concrete—deep into the ground. These columns completely bypass the weak, unpredictable topsoil. They anchor directly into a much stronger, stable layer of subsoil or rock far beneath the surface.</p>
+            <p><strong>Complete Peace of Mind</strong><br>
+            Piling provides the ultimate structural security for your property, ensuring your new space will not suffer from subsidence, movement, or cracking over time. Backed by complex structural calculations, it is the gold standard for protecting your investment.</p>
+        </div>
+
+        <!-- CONDITIONAL: SAP Calculations -->
+        <div id="pamphlet-sap" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
+            <h2 style="color: #0F3759;">Energy Efficiency: SAP Calculations</h2>
+            <p>One of the most exciting aspects of adding a bespoke living space to your home is the flood of natural light it brings. However, when designing an orangery or a conservatory with expansive glass elements, it is vital to ensure the room remains comfortable all year round—warm in the winter and cool in the summer.</p>
+            <p>To guarantee this perfect internal climate, the government requires a specific thermal assessment known as a SAP (Standard Assessment Procedure) Calculation.</p>
+            <p><strong>Why does my project need them?</strong><br>
+            UK Building Regulations state that if the amount of glass in your new extension exceeds 25% of its total floor area, you must legally prove that the new space will not cause excessive heat loss. Because your bespoke design features stunning, wide-spanning glazing to maximise your views, a SAP Calculation is required to satisfy your local Building Control department.</p>
+            <div style="height: 180px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: A bright Orangery interior bathed in sunlight]</div>
+            <p><strong>How the technology works for you</strong><br>
+            A SAP calculation is a complex mathematical model of your home's energy efficiency. Our architectural team will calculate the thermal efficiency of your existing house and balance it against the high-tech materials we are installing, such as our multi-layered insulated roofing systems.</p>
+            <p><strong>What do you need to do?</strong><br>
+            Absolutely nothing. Our in-house technical team and independent assessors manage the entire SAP Calculation process on your behalf. We seamlessly integrate these mathematical models into your Building Regulations application, ensuring your project moves forward smoothly without any stress or confusing paperwork on your end.</p>
+        </div>
+
+        <!-- CONDITIONAL: Full Planning Permission -->
+        <div id="pamphlet-planning-full" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
+            <h2 style="color: #0F3759;">Your Project Journey: Full Planning Permission</h2>
+            <p>Transforming your property is an exciting milestone, and we are here to guide you through every step. Because every house and every bespoke design is unique, some structures can be built under automatic rights, while others require formal Planning Permission from your local council. Based on our survey today, your beautiful new design will require a full planning application.</p>
+            <p><strong>Why does my design require Planning Permission?</strong><br>
+            Local authorities have specific rules regarding how a property can be altered. Your project requires formal permission because it meets one or more of the following criteria:</p>
+            <ul style="margin-top:0;">
+                <li><strong>Scale and Projection:</strong> The height, width, or outward projection of the design exceeds standard limits.</li>
+                <li><strong>Property Location:</strong> Your home may be situated in a designated Conservation Area, a National Park, or it may be a Listed Building.</li>
+                <li><strong>Boundary Proximity:</strong> The new structure may sit very close to a boundary line or front the main highway.</li>
+            </ul>
+            <div style="height: 180px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: 3D CAD design or architectural blueprint]</div>
+            <p><strong>How we manage the process for you</strong><br>
+            Navigating local council bureaucracy can be daunting, so we handle it entirely for you. Our dedicated architectural team will draw up precise, scaled CAD plans of your existing house and the proposed new structure. We will then submit the full application to your local planning department and act as your official agent.</p>
+            <p><strong>What are the timelines?</strong><br>
+            Timelines will vary according to your local authority, but please allow between 8 to 16 weeks from the submission of the application. While we cannot control the council's internal speed, we closely track the application every step of the way and will keep you fully updated.</p>
+        </div>
+
+        <!-- CONDITIONAL: Pre-Approved Planning -->
+        <div id="pamphlet-planning-pre" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
+            <h2 style="color: #0F3759;">Your Project Journey: Pre-Approved Planning</h2>
+            <p>Transforming your property is a wonderful investment. Based on our meticulous survey today, there is great news: your bespoke design has been specifically tailored to fall within the government's "Permitted Development" rights. This means your project avoids the heavier complexities of a full planning application.</p>
+            <p>However, to guarantee total peace of mind and strict legal compliance, your project will still require a formal Pre-Approval document (officially known as a Lawful Development Certificate or Prior Approval).</p>
+            <p><strong>Understanding the Pre-Approval Routes</strong><br>
+            While your design meets the strict criteria for automatic approval, local councils still require formal documentation to prove it.</p>
+            <ul style="margin-top:0;">
+                <li><strong>The Lawful Development Certificate:</strong> Indisputable, official proof that your new living space is 100% lawful.</li>
+                <li><strong>Prior Approval (Larger Home Extensions):</strong> A streamlined process allowing the council to formally verify dimensions and notify adjoining neighbours.</li>
+            </ul>
+            <div style="height: 180px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: A sleek, modern conservatory looking out onto a garden]</div>
+            <p><strong>Why is this documentation essential?</strong><br>
+            If you ever decide to sell or remortgage your home in the future, buyers' solicitors will inevitably ask for legal proof that your extension was built compliantly. Having this certificate securely on file prevents costly delays and protects the total value of your home.</p>
+            <p><strong>How we handle it</strong><br>
+            Our in-house technical team will draft the scaled architectural drawings, submit the application securely to your local authority, and act as your dedicated agent until the certificate is officially issued.</p>
+        </div>
+
+        <!-- CONDITIONAL: Cavity Trays -->
+        <div id="pamphlet-cavity" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
+            <h2 style="color: #0F3759;">Protecting Your Home: What is a Cavity Tray?</h2>
+            <p>When designing a new extension that joins seamlessly onto your existing house, ensuring the structure is completely watertight is our highest priority. The Great British weather can be unpredictable, and we want to ensure your beautiful new interior is permanently protected from the elements.</p>
+            <p>Before the building commences, one of our team will discuss with you the option of a cavity tray.</p>
+            <div style="height: 220px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: The 'Cavity Tray' cross-section graphic]</div>
+            <p><strong>What is a Cavity Tray?</strong><br>
+            Most modern homes are built with two 'skins' of brickwork with a gap (a cavity) between them. When it rains heavily, water can soak into the outer brickwork and run down the inside of that cavity. </p>
+            <p>A cavity tray is a series of high level damp proof courses that bridge a wall cavity to direct moisture to the external face of a wall where the extension roof joins the house wall. Essentially, a cavity tray prevents moisture that penetrates the outer wall from appearing inside your new extension. </p>
+            <p><strong>Why might my design need one?</strong><br>
+            In the event that your new living space is particularly exposed to prevailing winds and weather, we may recommend adding a cavity tray. This is highly relevant if your home is situated on the coast, in a rural location, or on top of a hill.</p>
+            <p><strong>What if I choose not to install one?</strong><br>
+            In many instances, a cavity tray may not be required, but please speak to your building team for more information. However, please be aware that if you are advised that your property requires a cavity tray and you decide not to fit one, some water ingress may occur in severe weather conditions.</p>
+        </div>    
         </div>
 
         <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 25px; border-radius: 8px; max-width: 500px; margin: 0 auto 30px; text-align: left; font-size: 16px;">

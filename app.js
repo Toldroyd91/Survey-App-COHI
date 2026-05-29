@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // ==========================================
     const designerProfiles = {
         "Tom": { phone: "07700 900000", email: "tom@cohi.co.uk", defaultBrand: "Yorkshire Windows", bio: "Thank you for welcoming me into your home today. Over the next 48 hours, I will be passing these precise measurements to our architectural team to generate your 3D visual renders and structural quote." },
-        "Sarah": { phone: "07700 900001", email: "sarah@cohi.co.uk", defaultBrand: "CO Home Improvements", bio: "It was a pleasure meeting you to discuss your new living space. I am now compiling your technical requirements to generate a comprehensive, bespoke quotation and design mockup." },
-        "Mark": { phone: "07700 900002", email: "mark@cohi.co.uk", defaultBrand: "CO Home Improvements", bio: "Thank you for your time today. I am personally overseeing the initial design phase of your project. We will have your custom 3D concepts and pricing structure ready for review shortly." }
+        "Sobaan": { phone: "07700 900001", email: "sobaan@cohi.co.uk", defaultBrand: "CO Home Improvements", bio: "It was a pleasure meeting you to discuss your new living space. I am now compiling your technical requirements to generate a comprehensive, bespoke quotation and design mockup." },
+        "James": { phone: "07700 900002", email: "james@cohi.co.uk", defaultBrand: "CO Home Improvements", bio: "Thank you for your time today. I am personally overseeing the initial design phase of your project. We will have your custom 3D concepts and pricing structure ready for review shortly." }
     };
 
     // YOUR CUSTOM BRAND LOGOS
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         "Clearview": "clearview.png",
         "CO Home Improvements": "logo.jpg",
         "Orion Windows": "orion.png",
-        "Planet Windows": "planet.png",
+        "Planet": "planet.png",
         "Trent Valley Windows": "trentvalley.png",
         "West Yorkshire Windows": "westyorkshire.png",
         "Yorkshire Windows": "yorkshire.png"
@@ -212,6 +212,81 @@ document.addEventListener('DOMContentLoaded', function() {
             const fileName = `${data.clientName.replace(/\s+/g, '')}_Design_Consultation.pdf`;
             const template = document.getElementById('pdfTemplateCustomer');
             
+            // --- 1. DYNAMIC LANDING PAGE LOGIC ---
+            const clientFirst = data.clientName.split(' ')[0] || 'Customer';
+            const build = document.getElementById('buildType').value;
+            const size = document.getElementById('proposedSize').value;
+            const roof = document.getElementById('roofType').value;
+            const frame = document.getElementById('frameColour').value;
+            const buildMat = document.getElementById('newBuildMaterial') ? document.getElementById('newBuildMaterial').value : '';
+            const planPerm = document.getElementById('planningPerms').value;
+            const buildReg = document.getElementById('buildingRegs').value;
+            const sap = document.getElementById('sapCalcs').value;
+            
+            const rawRevDate = document.getElementById('revisitDate') ? document.getElementById('revisitDate').value : '';
+            const revDate = rawRevDate ? new Date(rawRevDate).toLocaleDateString('en-GB') : '';
+            const revLoc = document.getElementById('revisitLocation') ? document.getElementById('revisitLocation').value : '';
+
+            document.getElementById('lp-greeting').innerHTML = `Hi ${clientFirst},<br><br>I want to say a massive thank you for inviting me into your home today. I’ve put together this summary document outlining the major talking points from our appointment so we both know we are on exactly the right lines. If there is anything you'd like to adjust, please don't hesitate to get in touch.`;
+
+            if (build && size) {
+                document.getElementById('lp-size').innerText = `We discussed creating a beautiful new ${build} with an approximate footprint of ${size}. This gives us a fantastic starting point for your bespoke design.`;
+            } else {
+                document.getElementById('lp-size').innerText = `We didn't quite pinpoint the exact dimensions of your build just yet, which is absolutely fine. We have plenty of flexibility to work towards the perfect size as we develop the design.`;
+            }
+
+            if (roof) {
+                document.getElementById('lp-roof').innerText = `Regarding the roof, the ${roof} really stood out as our primary choice, but there are plenty of other stunning options we can explore too as we refine the details.`;
+            } else {
+                document.getElementById('lp-roof').innerText = `We have yet to decide on the final roof style, but I will prepare a few different options for you to review so we can find the perfect match for your home.`;
+            }
+
+            if (frame && buildMat) {
+                document.getElementById('lp-frame').innerText = `Our current first choice for the frame colour is ${frame}, which is going to pair beautifully with the ${buildMat} we have chosen for the base.`;
+            } else if (frame) {
+                document.getElementById('lp-frame').innerText = `Our current first choice for the frame colour is ${frame}, which is going to look fantastic.`;
+            } else {
+                document.getElementById('lp-frame').innerText = `We haven't narrowed down the final frame colour or build materials just yet, but we have an incredible range to choose from. Just let me know when you are ready to explore them.`;
+            }
+
+            const planText = (planPerm === 'No' || !planPerm) ? 'do not' : 'do';
+            const regText = (buildReg === 'Yes') ? 'do' : 'do not';
+            const sapText = (sap === 'Yes') ? 'do' : 'do not';
+            document.getElementById('lp-compliance').innerText = `Based on your choices, it looks like we ${planText} need Planning Permission, we ${regText} need Building Regulations, and we ${sapText} need SAP calculations. Please don't worry about the technicalities of these—I have included a brief explanation of what they mean later in this pack, and our team will handle all of it for you.`;
+
+            if (revDate && revLoc) {
+                document.getElementById('lp-revisit').innerText = `We are booked back in to see you at ${revLoc} on ${revDate}. If you need anything at all before then, you can contact me on the details below.`;
+            } else {
+                document.getElementById('lp-revisit').innerText = `We haven't booked in a date for our next catch-up just yet, but as soon as we work out a time, we will get you scheduled in. If you need anything before I next get in touch, please contact me on the details below.`;
+            }
+
+            document.getElementById('lp-designer-name').innerText = data.designerName;
+            document.getElementById('lp-designer-contact').innerText = `${data.designerPhone} | ${data.designerEmail}`;
+
+            // --- 2. DYNAMIC PAMPHLET LOGIC ---
+            const selectedWeepVents = document.getElementById('weepventsExist').value;
+
+            // Reset all conditional pamphlets to hidden first
+            document.getElementById('pamphlet-sap').style.display = 'none';
+            document.getElementById('pamphlet-planning-full').style.display = 'none';
+            document.getElementById('pamphlet-planning-pre').style.display = 'none';
+            document.getElementById('pamphlet-cavity').style.display = 'none';
+
+            // Evaluate and turn on the required pamphlets
+            if (sap === 'Yes') {
+                document.getElementById('pamphlet-sap').style.display = 'block';
+            }
+            if (planPerm === 'Full Planning') {
+                document.getElementById('pamphlet-planning-full').style.display = 'block';
+            }
+            if (planPerm === 'Pre Approved Planning') {
+                document.getElementById('pamphlet-planning-pre').style.display = 'block';
+            }
+            if (build === 'Extension' && selectedWeepVents === 'Yes') {
+                document.getElementById('pamphlet-cavity').style.display = 'block';
+            }
+
+            // --- 3. BIND STANDARD DATA & RENDER ---
             template.querySelectorAll('.brand-logo-img').forEach(img => img.src = data.logoSource);
             document.getElementById('pdfDesignerBio').innerText = data.designerBio;
             document.getElementById('pdfDesignerName').innerText = data.designerName;
