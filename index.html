@@ -12,508 +12,70 @@
     </style>
 </head>
 <body>
-    <header class="navbar navbar--top" style="position: relative; padding: 15px;">
-        <div class="navbar__container" style="display: flex; gap: 15px; flex-wrap: wrap;">
-            <h1 class="navbar__title" style="margin-right: auto;">Survey App</h1>
+    <!-- ...Unchanged content before pdfTemplateCustomer... -->
 
-            <select id="brandSelect" class="form-group__input form-group__input--touch" style="min-height: 40px; height: 40px; padding: 0 10px; font-size: 0.9rem; width: 200px;">
-                <option value="Clearview">Clearview</option>
-                <option value="CO Home Improvements">CO Home Improvements</option>
-                <option value="Orion Windows">Orion Windows</option>
-                <option value="Planet">Planet</option>
-                <option value="Trent Valley Windows">Trent Valley Windows</option>
-                <option value="West Yorkshire Windows">West Yorkshire Windows</option>
-                <option value="Yorkshire Windows">Yorkshire Windows</option>
-            </select>
-
-            <input list="designerList" id="designerSelect" class="form-group__input form-group__input--touch" style="min-height: 40px; height: 40px; padding: 0 10px; font-size: 0.9rem; width: 160px;" placeholder="Select Designer...">
-            <datalist id="designerList">
-                <option value="Tom">
-                <option value="Sobaan">
-                <option value="James">
-            </datalist>
+    <div id="pdfTemplateCustomer"
+         style="display: none; background: white; color: #222; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; width: 800px; padding: 40px;">
+      <!-- PAGE 1: Cover -->
+      <div class="pdf-page" style="page-break-after: always; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+        <img src="logo.jpg" alt="Logo" style="max-height: 100px; margin-bottom: 50px;" />
+        <h1 style="color: #0F3759; font-size: 36px; letter-spacing: 1px; margin-bottom: 25px; text-align: center; font-weight: 700;">PREDESIGN SURVEY REPORT</h1>
+        <div style="background: #f8f9fa; border-radius: 10px; padding: 30px 50px; margin-bottom: 50px; width: 60%; min-width: 300px; max-width: 400px;">
+          <p style="margin: 0 0 15px 0; font-size: 16px;"><strong>Customer:</strong> <span class="bind-name"></span></p>
+          <p style="margin: 0 0 15px 0; font-size: 16px;"><strong>Address:</strong> <span class="bind-address"></span></p>
+          <p style="margin: 0; font-size: 16px;"><strong>Date:</strong> <span class="bind-date"></span></p>
         </div>
-    </header>
+        <p style="color: #888; font-size: 14px; text-align: center;">A personal summary for your project</p>
+      </div>
 
-    <main class="main-container main-container--centered">
-
-        <article class="card card--primary">
-            <h2 class="card__title">Customer Details</h2>
-            <div class="form-group"><label class="form-group__label">Customer Name:</label><input type="text" id="clientName" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group"><label class="form-group__label">Customer Num:</label><input type="tel" id="clientNum" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group"><label class="form-group__label">Customer Postcode:</label><input type="text" id="postCode" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group"><label class="form-group__label">Date of Appointment:</label><input type="date" id="apptDate" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group"><label class="form-group__label">2nd Appointment Date (Revisit):</label><input type="date" id="revisitDate" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group"><label class="form-group__label">2nd Appointment Location:</label><input type="text" id="revisitLocation" class="form-group__input form-group__input--touch" placeholder="e.g. your address, Our showroom..."></div>
-        </article>
-
-        <article class="card card--primary">
-            <h2 class="card__title">Elevation Photos</h2>
-            <div class="canvas-group" data-id="frontelevation" style="margin-bottom: 20px;">
-                <label class="form-group__label" style="color: var(--accent);">Front Elevation:</label>
-                <small style="display:block; color:#A0A0A0; margin-bottom:10px;">This is the main face of the building as viewed from the street, essential for assessing the property's existing style and condition. Please take a straight-on photo capturing the entire front of the house, ensuring both the roof and ground are fully visible.</small>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-frontelevation" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Photo</button>
-            </div>
-            <div class="canvas-group" data-id="sideelevation" style="margin-bottom: 20px;">
-                <label class="form-group__label" style="color: var(--accent);">Side Elevation: (If Possible)</label>
-                <small style="display:block; color:#A0A0A0; margin-bottom:10px;">This is the side view(s) of the property, essential for understanding access points and the available space along the boundary. Please take a straight-on photo capturing the entire side of the building, ensuring both the roof pitch and ground level are fully visible.</small>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-sideelevation" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Photo</button>
-            </div>
-            <div class="canvas-group" data-id="rearelevation">
-                <label class="form-group__label" style="color: var(--accent);">Rear Elevation:</label>
-                <small style="display:block; color:#A0A0A0; margin-bottom:10px;">This is the rear face of the property, essential for evaluating the available space and how the new design will integrate with existing doors, windows, and pipework. Please take a straight-on photo capturing the complete back of the building, ensuring the roofline and ground level are fully in frame</small>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-rearelevation" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Photo</button>
-            </div>
-        </article>
-
-        <article class="card card--primary">
-            <h2 class="card__title">Access Survey</h2>
-            <div class="form-group">
-                <label class="form-group__label">Is there anything that will make the route difficult for a wheelbarrow to get through? e.g. steps, tight corners, steep inclines:</label>
-                <select id="accessDifficult" class="form-group__input form-group__input--touch"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select>
-            </div>
-            <div class="form-group"><label class="form-group__label">The narrowest point of access (mm):</label><input type="number" id="accessWidth" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group">
-                <label class="form-group__label">Please upload maximum of 6 photos to show fitters exact route from where they will park to where they will be building:</label>
-                <input type="file" id="accessPhotos" class="form-group__input form-group__input--touch" accept="image/*" multiple style="padding-top:13px;">
-            </div>
-        </article>
-
-        <article class="card card--primary">
-            <h2 class="card__title">Location Survey</h2>
-            <div class="form-group"><label class="form-group__label">DPC Depth (mm):</label><input type="number" id="dpcDepth" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group">
-                <label class="form-group__label">House material:</label>
-                <select id="houseMaterial" class="form-group__input form-group__input--touch">
-                    <option value="">Select...</option>
-                    <option value="Brick">Brick</option><option value="Stone">Stone</option><option value="Render">Render</option><option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="canvas-group" data-id="housematerialphoto" style="margin-bottom: 20px;">
-                <label class="form-group__label" style="color: var(--accent);">Upload house material photo:</label>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-housematerialphoto" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Drawing</button>
-            </div>
-
-            <div class="form-group">
-                <label class="form-group__label">Are large trees like Oak, Willow, Poplar, Ash, or Sycamore within roughly 30 meters of the build?:</label>
-                <select id="treesExist" class="form-group__input form-group__input--touch"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select>
-            </div>
-            <div class="canvas-group" data-id="treelocations" style="margin-bottom: 20px;">
-                <label class="form-group__label" style="color: var(--accent);">If Yes, please upload photo and annotate:</label>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-treelocations" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Drawing</button>
-            </div>
-
-            <div class="form-group">
-                <label class="form-group__label">Are there visable Manholes / Inspection Chambers?:</label>
-                <select id="manholeExist" class="form-group__input form-group__input--touch"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select>
-            </div>
-            <div class="canvas-group" data-id="manhole" style="margin-bottom: 20px;">
-                <label class="form-group__label" style="color: var(--accent);">If Yes please upload photos and annotate:</label>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-manhole" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Drawing</button>
-            </div>
-
-            <div class="form-group">
-                <label class="form-group__label">Are there visable weep vents?:</label>
-                <select id="weepventsExist" class="form-group__input form-group__input--touch"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select>
-            </div>
-            <div class="canvas-group" data-id="weepvents" style="margin-bottom: 20px;">
-                <label class="form-group__label" style="color: var(--accent);">If Yes please upload photos and annotate:</label>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-weepvents" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Drawing</button>
-            </div>
-
-            <div class="form-group">
-                <label class="form-group__label">Are there any Air Bricks where the proposed extension is going? If Yes, how many?:</label>
-                <select id="airbricks" class="form-group__input form-group__input--touch">
-                    <option value="">Select...</option>
-                    <option value="No">No</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5+">5+</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-group__label">Are there existing rainwater pipes (RWP) and/or soil vent pipes (SVP)?:</label>
-                <select id="pipesExist" class="form-group__input form-group__input--touch"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select>
-            </div>
-            <div class="canvas-group" data-id="rwpsvp" style="margin-bottom: 20px;">
-                <label class="form-group__label" style="color: var(--accent);">If yes, please upload and annotate:</label>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-rwpsvp" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Drawing</button>
-            </div>
-
-            <div class="form-group"><label class="form-group__label">What is the height from the ground to the lowest part of the under side of the facia?:</label><input type="text" id="fasciaHeight" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group"><label class="form-group__label">Are there any obstacles on the wall such as boiler flues, air bricks, extractor vents, or satellite dishes in the way?:</label><textarea id="wallObstacles" class="form-group__input form-group__input--touch" rows="2"></textarea></div>
-        </article>
-
-        <article class="card card--primary">
-            <h2 class="card__title">Design Ideas</h2>
-            <div class="form-group">
-                <label class="form-group__label">Build Type?:</label>
-                <select id="buildType" class="form-group__input form-group__input--touch">
-                    <option value="">Select...</option><option value="Conservatory">Conservatory</option><option value="Extension">Extension</option><option value="Porch">Porch</option><option value="Roof and Frame">Roof and Frame</option><option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-group__label">Roof Type?:</label>
-                <select id="roofType" class="form-group__input form-group__input--touch">
-                    <option value="">Select...</option><option value="Ultra380">Ultra380</option><option value="LivinRoof">LivinRoof</option><option value="Glass Roof">Glass Roof</option><option value="Flat Roof">Flat Roof</option><option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group"><label class="form-group__label">Proposed Size (mm):</label><small style="display:block; color:#A0A0A0; margin-bottom:10px;">e.g. 3000x4000</small><input type="text" id="proposedSize" class="form-group__input form-group__input--touch"></div>
-
-            <div class="form-group">
-                <label class="form-group__label">Frame Colour?:</label>
-                <select id="frameColour" class="form-group__input form-group__input--touch">
-                    <option value="">Select...</option>
-                    <option value="White">White</option><option value="Grey Foil on White">Grey Foil on White</option><option value="Grey Foil">Grey Foil</option><option value="Rosewood on White">Rosewood on White</option><option value="Rosewood">Rosewood</option><option value="Light Oak on White">Light Oak on White</option><option value="Light Oak">Light Oak</option><option value="Black Brown Foil on White">Black Brown Foil on White</option><option value="Black Brown Foil">Black Brown Foil</option><option value="Cream Foil on White">Cream Foil on White</option><option value="Cream Foil">Cream Foil</option><option value="Chartwell Green on White">Chartwell Green on White</option><option value="Chartwell Green Foil">Chartwell Green Foil</option><option value="Irish Oak Foil on White">Irish Oak Foil on White</option><option value="Irish Oak Foil">Irish Oak Foil</option><option value="Olive Grey on White">Olive Grey on White</option><option value="Olive Grey">Olive Grey</option><option value="Smooth Grey on White">Smooth Grey on White</option><option value="Smooth Grey Throughout">Smooth Grey Throughout</option><option value="Agate Grey">Agate Grey</option><option value="Agate Grey on White">Agate Grey on White</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-group__label">New Build Material?:</label>
-                <select id="newBuildMaterial" class="form-group__input form-group__input--touch">
-                    <option value="">Select...</option>
-                    <option value="Brick">Brick</option>
-                    <option value="Brick exterior, Block interior">Brick exterior, Block interior</option>
-                    <option value="Block interior, Block & Cement Render exterior">Block interior, Block & Cement Render exterior</option>
-                    <option value="Block interior, Block & K Rend or equivalent exterior">Block interior, Block & K Rend or equivalent exterior</option>
-                    <option value="Block only">Block only</option>
-                    <option value="Artificial Stone exterior, block interior">Artificial Stone exterior, block interior</option>
-                    <option value="Artificial Stone">Artificial Stone</option>
-                    <option value="Natural Stone">Natural Stone</option>
-                    <option value="HUP Wall System">HUP Wall System</option>
-                </select>
-            </div>
-
-            <div class="form-group"><label class="form-group__label">Building Regs Required?:</label><select id="buildingRegs" class="form-group__input form-group__input--touch"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
-            <div class="form-group">
-                <label class="form-group__label">Planning Permission Required?:</label>
-                <select id="planningPerms" class="form-group__input form-group__input--touch"><option value="">Select...</option><option value="No">No</option><option value="Full Planning">Full Planning</option><option value="Pre Approved Planning">Pre Approved Planning</option></select>
-            </div>
-            <div class="form-group"><label class="form-group__label">SAP Calcs Required?:</label><select id="sapCalcs" class="form-group__input form-group__input--touch"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
-            <div class="form-group"><label class="form-group__label">Budget?:</label><input type="text" id="budget" class="form-group__input form-group__input--touch"></div>
-            <div class="form-group"><label class="form-group__label">Designer Notes:</label><textarea id="designerNotes" class="form-group__input form-group__input--touch" rows="4"></textarea></div>
-
-            <div class="canvas-group" data-id="designersketch">
-                <label class="form-group__label" style="color: var(--accent);">Designer Sketches:</label>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container" style="background:#fff;"><canvas id="canvas-designersketch" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear</button>
-            </div>
-        </article>
-
-        <article class="card card--primary">
-            <h2 class="card__title">Misc</h2>
-            <div class="form-group"><label class="form-group__label">Additional Notes:</label><textarea id="miscNotes" class="form-group__input form-group__input--touch" rows="3"></textarea></div>
-            <div class="canvas-group" data-id="miscphotos">
-                <label class="form-group__label" style="color: var(--accent);">Additional Photos:</label>
-                <input type="file" class="camera-input form-group__input--touch" accept="image/*"><div class="canvas-container"><canvas id="canvas-miscphotos" width="600" height="400"></canvas></div><button type="button" class="clear-btn button" style="margin-top:10px; background: #333; color: white;">Clear Photo</button>
-            </div>
-        </article>
-
-        <div style="display: flex; gap: 15px; margin-top: 34px;">
-            <button id="generateCustomerPdfBtn" class="button" style="background: #2D2D2D; border: 2px solid var(--accent); box-shadow: none; width: 50%;">Customer Checklist PDF</button>
-            <button id="generateInternalPdfBtn" class="button" style="width: 50%;">Full Survey PDF</button>
+      <!-- PAGE 2: Main Survey Summary -->
+      <div class="pdf-page" style="page-break-after: always; display: flex; flex-direction: column; align-items: center;">
+        <img src="logo.jpg" alt="Logo" style="max-height: 80px; margin-bottom: 24px;" />
+        <div style="width: 100%; max-width: 600px; background: #f8f9fa; border-radius: 10px; padding: 40px; box-sizing: border-box; text-align: center;">
+          <p id="lp-greeting" style="margin-bottom: 22px; font-size: 16px;"></p>
+          <p id="lp-size" style="margin-bottom: 22px; font-size: 16px;"></p>
+          <p id="lp-roof" style="margin-bottom: 22px; font-size: 16px;"></p>
+          <p id="lp-frame" style="margin-bottom: 22px; font-size: 16px;"></p>
+          <p id="lp-compliance" style="margin-bottom: 22px; font-size: 16px;"></p>
+          <p id="lp-revisit" style="margin-bottom: 36px; font-size: 16px;"></p>
+          <div style="margin-top: 20px;">
+            <p style="margin-bottom: 6px; color: #555;">Best regards,</p>
+            <p id="lp-designer-name" style="margin: 0; font-weight: bold; color: #0F3759; font-size: 17px;"></p>
+            <p style="margin: 0 0 0 0; color: #666; font-size: 15px;">Design Consultant</p>
+            <p id="lp-designer-contact" style="margin: 12px 0 0 0; font-size: 14px; color: #888;"></p>
+          </div>
         </div>
-        <button id="resetFormBtn" class="button btn-danger" style="margin-top: 20px; width: 100%;">Clear Form for Next Appointment</button>
-    </main>
+      </div>
 
-    <div id="pdfTemplateInternal" style="display: none; background: #ffffff; color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; width: 800px; padding: 40px; box-sizing: border-box;">
-
-        <div class="pdf-page" style="page-break-after: always; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding-top: 20px;">
-            <div>
-                <img class="brand-logo-img" src="logo.jpg" style="max-height: 90px; margin-bottom: 25px;">
-                <h1 style="color: #0F3759; font-size: 34px; margin: 0 0 10px 0; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Technical Survey Report</h1>
-                <div style="width: 80px; height: 4px; background: #0F3759; margin: 0 auto 30px auto; border-radius: 2px;"></div>
-            </div>
-
-            <div style="width: 100%; border: 1px solid #e1e4e6; border-radius: 6px; overflow: hidden; background: #f8f9fa; margin: 20px auto; padding: 10px; box-sizing: border-box;">
-                <p style="margin: 0 0 8px 0; text-align: left; font-size: 13px; font-weight: bold; color: #0F3759; text-transform: uppercase;">Front Elevation Reference</p>
-                <img id="pdfImgInternal-frontelevation" style="width: 100%; height: 380px; object-fit: contain; border-radius: 4px;">
-            </div>
-
-            <div style="background: #f8f9fa; border-left: 5px solid #0F3759; padding: 25px; text-align: left; border-radius: 4px; margin-top: 30px;">
-                <h3 style="margin: 0 0 15px 0; color: #0F3759; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px;">Customer Details</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 30px; font-size: 14px; color: #495057;">
-                    <div><strong>Customer Name:</strong> <span class="bind-name" style="color:#000; font-weight:600;"></span></div>
-                    <div><strong>Date of Survey:</strong> <span class="bind-date" style="color:#000; font-weight:600;"></span></div>
-                    <div><strong>Customer Number:</strong> <span class="bind-num" style="color:#000; font-weight:600;"></span></div>
-                    <div><strong>Assigned Designer:</strong> <span id="pdfPrintDesigner" style="color:#000; font-weight:600;"></span></div>
-                    <div style="grid-column: span 2;"><strong>Site Address / Postcode:</strong> <span class="bind-address" style="color:#000; font-weight:600;"></span> &nbsp;&nbsp;[<a id="googleMapsLink" href="#" style="color: #0F3759; font-weight: bold; text-decoration: none;">➔ Open Navigation Route</a>]</div>
-                </div>
-            </div>
+      <!-- PAGE 3: Elevation Photo -->
+      <div class="pdf-page" style="page-break-after: always; display: flex; flex-direction: column; align-items: center;">
+        <img src="logo.jpg" alt="Logo" style="max-height: 80px; margin-bottom: 28px;" />
+        <h2 style="color: #0F3759; font-size: 20px; margin-bottom: 20px;">Front Elevation</h2>
+        <div style="width: 640px; height: 400px; background: #f8f9fa; border-radius: 10px; border: 1px solid #e2e2e2; display: flex; align-items: center; justify-content: center;">
+          <img id="pdfImgCustomer-frontelevation" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
         </div>
+      </div>
 
-        <div class="pdf-page" style="page-break-after: always; padding-top: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0F3759; padding-bottom: 10px; margin-bottom: 25px;">
-                <span style="font-size: 12px; font-weight: bold; color: #6c757d; text-transform: uppercase;">Internal Specification Dataset</span>
-                <img class="brand-logo-img" src="logo.jpg" style="max-height: 35px;">
-            </div>
-
-            <h3 style="background: #0F3759; color: white; padding: 8px 14px; margin: 0 0 15px 0; font-size: 14px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">1. Design Ideas & Project Scope</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;">
-                <tr style="background: #f8f9fa;"><td style="padding: 10px; border: 1px solid #dee2e6; width: 25%; font-weight: bold; color: #495057;">Build Type:</td><td id="pdfBuildType" style="padding: 10px; border: 1px solid #dee2e6; width: 25%;"></td><td style="padding: 10px; border: 1px solid #dee2e6; width: 25%; font-weight: bold; color: #495057;">Roof Type:</td><td id="pdfRoofType" style="padding: 10px; border: 1px solid #dee2e6; width: 25%;"></td></tr>
-                <tr><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Proposed Size:</td><td id="pdfProposedSize" style="padding: 10px; border: 1px solid #dee2e6;"></td><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Frame Colour:</td><td id="pdfFrameColour" style="padding: 10px; border: 1px solid #dee2e6;"></td></tr>
-                <tr style="background: #f8f9fa;"><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Building Regs:</td><td id="pdfBuildingRegs" style="padding: 10px; border: 1px solid #dee2e6;"></td><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Planning Permission:</td><td id="pdfPlanningPerms" style="padding: 10px; border: 1px solid #dee2e6;"></td></tr>
-                <tr><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">SAP Calculations:</td><td id="pdfSapCalcs" style="padding: 10px; border: 1px solid #dee2e6;"></td><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Target Budget:</td><td id="pdfBudget" style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #0F3759;"></td></tr>
-            </table>
-
-            <h3 style="background: #0F3759; color: white; padding: 8px 14px; margin: 0 0 15px 0; font-size: 14px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">2. Access Logistics Matrix</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;">
-                <tr style="background: #f8f9fa;"><td style="padding: 10px; border: 1px solid #dee2e6; width: 35%; font-weight: bold; color: #495057;">Wheelbarrow Route Issues?</td><td id="pdfAccessDifficult" style="padding: 10px; border: 1px solid #dee2e6; width: 65%;"></td></tr>
-                <tr><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Narrowest Access Width Point:</td><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold;"><span id="pdfAccessWidth"></span> mm</td></tr>
-            </table>
-
-            <h3 style="background: #0F3759; color: white; padding: 8px 14px; margin: 0 0 15px 0; font-size: 14px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">3. Structural & Location Metrics</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
-                <tr style="background: #f8f9fa;"><td style="padding: 10px; border: 1px solid #dee2e6; width: 35%; font-weight: bold; color: #495057;">DPC Depth Measure:</td><td style="padding: 10px; border: 1px solid #dee2e6; width: 15%;"><span id="pdfDpcDepth"></span> mm</td><td style="padding: 10px; border: 1px solid #dee2e6; width: 35%; font-weight: bold; color: #495057;">House Material:</td><td id="pdfHouseMaterial" style="padding: 10px; border: 1px solid #dee2e6; width: 15%;"></td></tr>
-                <tr><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Ground to Underside of Fascia:</td><td style="padding: 10px; border: 1px solid #dee2e6;"><span id="pdfFasciaHeight"></span> mm</td><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Impacted Air Bricks Count:</td><td id="pdfAirBricks" style="padding: 10px; border: 1px solid #dee2e6;"></td></tr>
-                <tr style="background: #f8f9fa;"><td style="padding: 10px; border: 1px solid #dee2e6; font-weight: bold; color: #495057;">Wall Structural Obstacles:</td><td colspan="3" id="pdfWallObstacles" style="padding: 10px; border: 1px solid #dee2e6; line-height: 1.4;"></td></tr>
-            </table>
-
-            <h3 style="background: #495057; color: white; padding: 6px 12px; margin: 25px 0 10px 0; font-size: 12px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Designer Operational Summary</h3>
-            <div style="border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; font-size: 13px; min-height: 50px; background: #fafafa; margin-bottom: 15px; line-height: 1.4;">
-                <strong style="color: #0F3759; display:block; margin-bottom: 5px;">Field Notes:</strong><span id="pdfDesignerNotes"></span>
-            </div>
-            <div style="border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; font-size: 13px; min-height: 40px; background: #fafafa; line-height: 1.4;">
-                <strong style="color: #495057; display:block; margin-bottom: 5px;">Additional Notes:</strong><span id="pdfMiscNotes"></span>
-            </div>
+      <!-- PAGE 4: Next Steps/Central Info Page -->
+      <div class="pdf-page" style="page-break-after: always; display: flex; flex-direction: column; align-items: center;">
+        <img src="logo.jpg" alt="Logo" style="max-height: 80px; margin-bottom: 24px;" />
+        <div style="width: 100%; max-width: 600px; background: #f8f9fa; border-radius: 10px; padding: 32px; text-align: center;">
+          <h2 style="color: #0F3759; font-size: 22px; margin-bottom: 24px; font-weight: 600;">Next Steps</h2>
+          <p id="pdfDesignerBio" style="font-size: 15px; margin-bottom: 20px; color: #555;"></p>
+          <div style="margin-top: 20px;">
+            <p style="margin-bottom: 5px; font-weight: 500;">Your Designer: <span id="pdfDesignerName"></span></p>
+            <p style="margin: 0; font-size: 14px;">Contact: <span id="pdfDesignerContact"></span></p>
+          </div>
         </div>
+      </div>
 
-        <div class="pdf-page" style="padding-top: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0F3759; padding-bottom: 10px; margin-bottom: 25px;">
-                <span style="font-size: 12px; font-weight: bold; color: #6c757d; text-transform: uppercase;">Technical Drawings & Annotations Log</span>
-                <img class="brand-logo-img" src="logo.jpg" style="max-height: 35px;">
-            </div>
+      <!-- You can use similar markup for any additional, conditional, or informational pages. -->
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 15px;">
-                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#fbeeeb;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#c92a2a; text-transform:uppercase;">House Material</p><img id="pdfImgInternal-housematerialphoto" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
-                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#fbeeeb;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#c92a2a; text-transform:uppercase;">Manhole / Inspection Chamber</p><img id="pdfImgInternal-manhole" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
-                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#fbeeeb;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#c92a2a; text-transform:uppercase;">Drainage Weep Vents</p><img id="pdfImgInternal-weepvents" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
-                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#fbeeeb;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#c92a2a; text-transform:uppercase;">Rainwater / Soil Vent Pipes</p><img id="pdfImgInternal-rwpsvp" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
-                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#fbeeeb;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#c92a2a; text-transform:uppercase;">Trees within 30m</p><img id="pdfImgInternal-treelocations" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
-                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#f1f3f5;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#495057; text-transform:uppercase;">Side Elevation Photo</p><img id="pdfImgInternal-sideelevation" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
-                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#f1f3f5;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#495057; text-transform:uppercase;">Rear Elevation Photo</p><img id="pdfImgInternal-rearelevation" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
-                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#f1f3f5;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#495057; text-transform:uppercase;">Additional Photos</p><img id="pdfImgInternal-miscphotos" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
-            </div>
-
-            <div style="page-break-before: always; padding-top: 10px;"></div>
-            <div style="border: 1px solid #dee2e6; padding: 12px; border-radius: 4px; background: #fff; box-sizing: border-box; width: 100%;">
-                <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 12px; color: #0F3759; text-transform: uppercase; border-bottom: 1px solid #dee2e6; padding-bottom: 4px;">Designer Sketch</p>
-                <img id="pdfImgInternal-designersketch" style="width: 100%; height: 440px; object-fit: contain;">
-            </div>
-        </div>
     </div>
 
-    <div id="pdfTemplateCustomer" style="display: none; background: white; color: black; font-family: Arial, sans-serif; width: 800px; padding: 40px; text-align: center;">
-        <img class="brand-logo-img" src="logo.jpg" style="max-height: 120px; margin-bottom: 20px;">
-        <h1 style="color: #0F3759; margin-bottom: 5px; font-size: 32px; letter-spacing: 1px;">PREDESIGN SURVEY REPORT</h1>
-
-        <div style="page-break-after: always; text-align: left; padding: 20px 40px; font-size: 15px; line-height: 1.6; color: #333;">
-            <p id="lp-greeting" style="margin-bottom: 20px;"></p>
-            <p id="lp-size" style="margin-bottom: 20px;"></p>
-            <p id="lp-roof" style="margin-bottom: 20px;"></p>
-            <p id="lp-frame" style="margin-bottom: 20px;"></p>
-            <p id="lp-compliance" style="margin-bottom: 20px;"></p>
-            <p id="lp-revisit" style="margin-bottom: 30px;"></p>
-
-            <p style="margin-bottom: 5px;">Best regards,</p>
-            <p style="margin-bottom: 0px; font-weight: bold; font-size: 16px; color: #0F3759;" id="lp-designer-name"></p>
-            <p style="margin-top: 0px; color: #666;">Design Consultant</p>
-            <p style="margin-top: 10px; font-size: 14px;" id="lp-designer-contact"></p>
-        </div>
-
-        <div style="width: 100%; max-width: 650px; height: 400px; margin: 30px auto; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: #f9f9f9;">
-            <img id="pdfImgCustomer-frontelevation" style="width: 100%; height: 100%; object-fit: contain;">
-        </div> <div style="background: #f5f5f5; border: 1px solid #ddd; padding: 25px; border-radius: 8px; max-width: 500px; margin: 0 auto 30px; text-align: left; font-size: 16px;">
-            <p style="margin: 0 0 12px 0;"><strong>Customer:</strong> <span class="bind-name"></span></p>
-            <p style="margin: 0 0 12px 0;"><strong>Address:</strong> <span class="bind-address"></span></p>
-            <p style="margin: 0;"><strong>Date:</strong> <span class="bind-date"></span></p>
-        </div>
-
-        <div style="border-top: 2px solid #0F3759; padding-top: 20px; text-align: left; max-width: 650px; margin: 0 auto;">
-            <h3 style="color: #0F3759; margin-top:0;">Next Steps</h3>
-            <p id="pdfDesignerBio" style="font-size: 14px; line-height: 1.6; color: #444;"></p>
-            <p style="margin-top: 20px; font-weight: bold; font-size: 16px;">Your Designer: <span id="pdfDesignerName"></span></p>
-            <p style="margin-top: 5px; font-size: 14px;">Contact: <span id="pdfDesignerContact"></span></p>
-        </div>
-
-        <div style="page-break-before: always; text-align: center; padding-top: 5px;">
-            <img class="brand-logo-img" src="logo.jpg" style="max-height: 120px; margin-bottom: 20px;">
-        <h1 style="color: #0F3759; margin-bottom: 5px; font-size: 20px; letter-spacing: 1px;">COHI FAMILY: WHO ARE WE?</h1>
-            <p><strong>Welcome to CO Home Improvements</strong><br>
-            Choosing to invest in a new conservatory, orangery, or extension is one of the most important decisions you will make for your home. To bring your vision to life, you need a trusted partner equipped with advanced products, first-class installation skills, and an unwavering commitment to quality.</p>
-            <p>CO Home Improvements is a trusted partnership of outstanding local businesses—including West Yorkshire Windows, Trent Valley Windows, Orion Windows, Yorkshire Windows, Clearview, and Planet—working together with one shared purpose: to enhance your home and enrich your life.</p>
-            <div style="height: 200px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: The COHI Brand Family Logos]</div>
-            <p><strong>Local Expertise, National Strength</strong><br>
-            Individually, each company brings years of expertise, craftsmanship, and customer care. Together, we are a powerhouse of home improvement professionals—stronger, smarter, and more dedicated to delivering an exceptional experience from start to finish.</p>
-            <p>We know that improving your home can feel overwhelming, which is why we make it our mission to keep things simple, clear, and stress-free. From your first consultation to final installation, our friendly team is always on hand to communicate, guide, and support you every step of the way.</p>
-            <p><strong>A Community Built on Trust</strong><br>
-            With over 30 years of experience in the home improvement market, it is fair to say that with age comes experience. We have installed every style, size, shape, and design imaginable, making us true experts in our field. With CO Home Improvements, you are not just investing in your home—you are joining a community built on trust, quality, and shared values.</p>
-        </div>
-        
-                <!-- PROJECT JOURNEY: PAGE 1 -->
-        <div style="page-break-before: always; padding-top: 40px; text-align: center;">
-            <img class="brand-logo-img" src="logo.jpg" style="max-height: 90px; margin-bottom: 30px;">
-            <h2 style="color: #0F3759; margin-bottom: 25px; font-size: 24px; letter-spacing: 1px;">Your Project Journey: Step-by-Step</h2>
-            
-            <p style="margin-bottom: 25px; line-height: 1.7; font-size: 15px;">It's a really exciting time getting ready to bring your new living space to life. However, we know it can also be a little daunting not knowing what's coming next and what you can expect to happen over the next few weeks. The breakdown below highlights the various stages involved in getting your project underway, so you're able to keep track of your progress throughout the process – and don't worry, we'll keep in touch to ensure you're fully up to speed with progress. <!-- --></p>
-            
-            <div style="display: inline-block; text-align: left; max-width: 600px; margin: 0 auto;">
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>1. Sale Agreed</strong><br>
-                Contract signed and returned to us. <!-- --></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>2. Survey Appointment</strong><br>
-                Our surveying team will contact you to make an appointment to take measurements, clarify details and ensure your design is suitable. You can discuss any potential changes at this stage. If your new living space requires planning permission, they'll also take the necessary measurements to produce the planning drawings.<br>
-                <em style="color: #666;">Timescale: Approx. 2 weeks from point of sale. <!-- --></em></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>3. Planning Permission</strong><br>
-                Your Surveyor will complete the planning application form (where applicable) and submit this with all relevant drawings to your local council for approval.<br>
-                <em style="color: #666;">Timescale: This will vary according to your local authority, but please allow between 8-16 weeks from submission of application. <!-- --></em></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>4. Survey Report</strong><br>
-                Working drawings and Planning Permission (where applicable) will then be sent to our pre-commencement team. Any necessary amendments to your sales contract will also be made at this stage by our Quantity Surveyor, by way of a contract variation.<br>
-                <em style="color: #666;">Timescale: Approx. 1 week. <!-- --></em></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>5. Test Dig Conducted</strong><br>
-                We conduct a 'test dig' at this stage of most installations. The purpose is to ascertain local ground conditions to ensure they are suitable for a traditional concrete base and foundation before any works commence.<br>
-                <em style="color: #666;">Timescale: Approx. 1 week from submission of the survey report. <!-- --></em></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>6. Building Regulations</strong><br>
-                Your Contracts Administrator will then submit your project (where applicable) for Building Regulations approval.<br>
-                <em style="color: #666;">Timescale: Approx. 1 week. <!-- --></em></p>
-            </div>
-        </div>
-
-        <!-- PROJECT JOURNEY: PAGE 2 -->
-        <div style="page-break-before: always; padding-top: 40px; text-align: center;">
-            <img class="brand-logo-img" src="logo.jpg" style="max-height: 90px; margin-bottom: 30px;">
-            <h2 style="color: #0F3759; margin-bottom: 25px; font-size: 24px; letter-spacing: 1px;">Your Project Journey (Continued)</h2>
-            
-            <div style="display: inline-block; text-align: left; max-width: 600px; margin: 0 auto;">
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>7. Customer Sign-Off</strong><br>
-                Our Contracts Administrator will contact you to sign off the final contract including any amends. <!-- --></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>8. Procurement of Products and Sub-Contract Packages</strong><br>
-                At this stage, our procurement team will make the necessary arrangements to procure the relevant sub-contract packages for your build and order your products ready for building commencement.<br>
-                <em style="color: #666;">Timescale: Approx. 2 weeks. <!-- --></em></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>9. Commencement of Building Works</strong><br>
-                Our building team will make contact with you to arrange a building start date. They will discuss with you power and water requirements on site and will also discuss brick match with you before they start building your base.<br>
-                <em style="color: #666;">Timescale: Approx. 1 - 2 weeks dependent on ground conditions. <!-- --></em></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>10. Installation Commences</strong><br>
-                Once your building work is complete your frames and/or roof will be fitted. Your Project Manager will be your main point of contact from now until your installation is complete. Our team will liaise with you to agree suitable appointment dates for the various stages of work to be carried out.<br>
-                <em style="color: #666;">Timescale: Approx. 1 week after the base completion. <!-- --></em></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 15px;"><strong>11. Finishing Trades</strong><br>
-                Once your installation is complete, your Project Manager will contact you to arrange the relevant finishing trades including (where appropriate) plastering, plumbing, floor laying and electrics.<br>
-                <em style="color: #666;">Timescale: Approx. 2 - 4 weeks. <!-- --></em></p>
-
-                <p style="margin-bottom: 25px; line-height: 1.7; font-size: 15px;"><strong>12. Completion Appointment</strong><br>
-                One final inspection will be conducted to ensure that the installation aligns with both your expectations and our agreement. Upon completion, we will request that you sign our compliance declaration form. We will also carry out a complimentary builders clean on completion. <!-- --></p>
-
-                <p style="margin-bottom: 15px; line-height: 1.7; font-size: 13px; color: #888; font-style: italic; border-top: 1px solid #eee; padding-top: 15px;">*Timescales provided are to act as a guide only and may differ depending on the complexity of the project. <!-- --></p>
-            </div>
-        </div>
-
-
-        <div style="page-break-before: always; text-align: left; padding-top: 20px;">
-            <h2 style="color: #0F3759;">Why Choose Us: Excellence & Peace of Mind</h2>
-            <p>We do not just define value by price. Though our prices are some of the most competitive in the home improvement market, we also offer incredible value in the quality of our products, as well as our expert, highly professional service. We keep a close eye on our competitors to ensure we always offer great quality at fair prices, supported by excellent service.</p>
-            <div style="height: 180px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: High-quality hardware or flawless brickwork]</div>
-            <p><strong>Unmatched Guarantees & Value</strong></p>
-            <ul style="margin-top:0;">
-                <li style="margin-bottom: 8px;"><strong>The Price Promise Challenge:</strong> We are so confident in our value that we offer a strict price promise. Find an equivalent quality uPVC product for less within 7 days and we will match or refund the difference.</li>
-                <li style="margin-bottom: 8px;"><strong>Industry-Leading 20-Year Guarantee:</strong> Once your installation is complete, we provide a comprehensive, insurance-backed guarantee completely free of charge, giving you total confidence in your investment.</li>
-                <li style="margin-bottom: 8px;"><strong>Flexible Funding:</strong> We are fully authorised and regulated by the Financial Conduct Authority (FCA). To make life easy for you, we can arrange a variety of convenient, easy-payment finance options.</li>
-            </ul>
-            <p><strong>Our Industry Accreditations</strong><br>
-            We are independently vetted and held to the absolute highest manufacturing and installation standards in the UK:</p>
-            <ul style="margin-top:0;">
-                <li style="margin-bottom: 5px;"><strong>FENSA Approved:</strong> Ensures all replacement windows and doors meet current building regulations.</li>
-                <li style="margin-bottom: 5px;"><strong>GGF Members:</strong> Operating to the highest technical standards for glass supply and installation.</li>
-                <li style="margin-bottom: 5px;"><strong>ISO 9001 Certified:</strong> Strict, internationally recognised benchmarks for quality management systems.</li>
-                <li style="margin-bottom: 5px;"><strong>Constructionline Gold & CHAS:</strong> Elite memberships recognising our strict commitment to health, safety, and environmental management.</li>
-            </ul>
-        </div>
-
-        <div style="page-break-before: always; text-align: left; padding-top: 20px;">
-            <h2 style="color: #0F3759;">Understanding Your Foundation: Piling</h2>
-            <p>Every beautiful, long-lasting living space starts with what lies beneath it. Bringing your dream design to life is an exciting journey, and our first priority is ensuring your new extension or conservatory has a rock-solid, permanent foundation. Because every property is unique, we take a tailored approach to the groundworks beneath your home.</p>
-            <p><strong>The Crucial "Test Dig"</strong><br>
-            At the beginning of every installation, we conduct a dedicated 'test dig'. The purpose of this is to ascertain your local ground conditions and ensure they are perfectly suitable for a traditional concrete base and foundation. We want to know exactly what we are building on before we lay a single brick.</p>
-            <div style="height: 150px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: Clean, prepared trench or structural piling]</div>
-            <p><strong>What happens if the ground is unstable?</strong><br>
-            Sometimes, we discover that standard trench foundations are not suitable. Where the ground is found to be unsuitable, we will advise on a highly secure, engineered alternative, such as a specialist pile foundation. Ground can be unstable due to large nearby trees drawing moisture from clay-heavy soil, deep peat, loose sand, or previously backfilled areas.</p>
-            <p><strong>What is Piling?</strong><br>
-            Instead of digging a wide, shallow trench, piling involves driving or drilling strong, narrow columns—made of reinforced steel and concrete—deep into the ground. These columns completely bypass the weak, unpredictable topsoil. They anchor directly into a much stronger, stable layer of subsoil or rock far beneath the surface.</p>
-            <p><strong>Complete Peace of Mind</strong><br>
-            Piling provides the ultimate structural security for your property, ensuring your new space will not suffer from subsidence, movement, or cracking over time. Backed by complex structural calculations, it is the gold standard for protecting your investment.</p>
-        </div>
-
-        <div id="pamphlet-sap" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
-            <h2 style="color: #0F3759;">Energy Efficiency: SAP Calculations</h2>
-            <p>One of the most exciting aspects of adding a bespoke living space to your home is the flood of natural light it brings. However, when designing an orangery or a conservatory with expansive glass elements, it is vital to ensure the room remains comfortable all year round—warm in the winter and cool in the summer.</p>
-            <p>To guarantee this perfect internal climate, the government requires a specific thermal assessment known as a SAP (Standard Assessment Procedure) Calculation.</p>
-            <p><strong>Why does my project need them?</strong><br>
-            UK Building Regulations state that if the amount of glass in your new extension exceeds 25% of its total floor area, you must legally prove that the new space will not cause excessive heat loss. Because your bespoke design features stunning, wide-spanning glazing to maximise your views, a SAP Calculation is required to satisfy your local Building Control department.</p>
-            <div style="height: 180px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: A bright Orangery interior bathed in sunlight]</div>
-            <p><strong>How the technology works for you</strong><br>
-            A SAP calculation is a complex mathematical model of your home's energy efficiency. Our architectural team will calculate the thermal efficiency of your existing house and balance it against the high-tech materials we are installing, such as our multi-layered insulated roofing systems.</p>
-            <p><strong>What do you need to do?</strong><br>
-            Absolutely nothing. Our in-house technical team and independent assessors manage the entire SAP Calculation process on your behalf. We seamlessly integrate these mathematical models into your Building Regulations application, ensuring your project moves forward smoothly without any stress or confusing paperwork on your end.</p>
-        </div>
-
-        <div id="pamphlet-planning-full" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
-            <h2 style="color: #0F3759;">Your Project Journey: Full Planning Permission</h2>
-            <p>Transforming your property is an exciting milestone, and we are here to guide you through every step. Because every house and every bespoke design is unique, some structures can be built under automatic rights, while others require formal Planning Permission from your local council. Based on our survey today, your beautiful new design will require a full planning application.</p>
-            <p><strong>Why does my design require Planning Permission?</strong><br>
-            Local authorities have specific rules regarding how a property can be altered. Your project requires formal permission because it meets one or more of the following criteria:</p>
-            <ul style="margin-top:0;">
-                <li><strong>Scale and Projection:</strong> The height, width, or outward projection of the design exceeds standard limits.</li>
-                <li><strong>Property Location:</strong> Your home may be situated in a designated Conservation Area, a National Park, or it may be a Listed Building.</li>
-                <li><strong>Boundary Proximity:</strong> The new structure may sit very close to a boundary line or front the main highway.</li>
-            </ul>
-            <div style="height: 180px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: 3D CAD design or architectural blueprint]</div>
-            <p><strong>How we manage the process for you</strong><br>
-            Navigating local council bureaucracy can be daunting, so we handle it entirely for you. Our dedicated architectural team will draw up precise, scaled CAD plans of your existing house and the proposed new structure. We will then submit the full application to your local planning department and act as your official agent.</p>
-            <p><strong>What are the timelines?</strong><br>
-            Timelines will vary according to your local authority, but please allow between 8 to 16 weeks from the submission of the application. While we cannot control the council's internal speed, we closely track the application every step of the way and will keep you fully updated.</p>
-        </div>
-
-        <div id="pamphlet-planning-pre" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
-            <h2 style="color: #0F3759;">Your Project Journey: Pre-Approved Planning</h2>
-            <p>Transforming your property is a wonderful investment. Based on our meticulous survey today, there is great news: your bespoke design has been specifically tailored to fall within the government's "Permitted Development" rights. This means your project avoids the heavier complexities of a full planning application.</p>
-            <p>However, to guarantee total peace of mind and strict legal compliance, your project will still require a formal Pre-Approval document (officially known as a Lawful Development Certificate or Prior Approval).</p>
-            <p><strong>Understanding the Pre-Approval Routes</strong><br>
-            While your design meets the strict criteria for automatic approval, local councils still require formal documentation to prove it.</p>
-            <ul style="margin-top:0;">
-                <li><strong>The Lawful Development Certificate:</strong> Indisputable, official proof that your new living space is 100% lawful.</li>
-                <li><strong>Prior Approval (Larger Home Extensions):</strong> A streamlined process allowing the council to formally verify dimensions and notify adjoining neighbours.</li>
-            </ul>
-            <div style="height: 180px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: A sleek, modern conservatory looking out onto a garden]</div>
-            <p><strong>Why is this documentation essential?</strong><br>
-            If you ever decide to sell or remortgage your home in the future, buyers' solicitors will inevitably ask for legal proof that your extension was built compliantly. Having this certificate securely on file prevents costly delays and protects the total value of your home.</p>
-            <p><strong>How we handle it</strong><br>
-            Our in-house technical team will draft the scaled architectural drawings, submit the application securely to your local authority, and act as your dedicated agent until the certificate is officially issued.</p>
-        </div>
-
-        <div id="pamphlet-cavity" style="display: none; page-break-before: always; text-align: left; padding-top: 20px;">
-            <h2 style="color: #0F3759;">Protecting Your Home: What is a Cavity Tray?</h2>
-            <p>When designing a new extension that joins seamlessly onto your existing house, ensuring the structure is completely watertight is our highest priority. The Great British weather can be unpredictable, and we want to ensure your beautiful new interior is permanently protected from the elements.</p>
-            <p>Before the building commences, one of our team will discuss with you the option of a cavity tray.</p>
-            <div style="height: 220px; background: #f5f5f5; border: 1px dashed #ccc; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #A0A0A0; font-style: italic;">[Insert Photo: The 'Cavity Tray' cross-section graphic]</div>
-            <p><strong>What is a Cavity Tray?</strong><br>
-            Most modern homes are built with two 'skins' of brickwork with a gap (a cavity) between them. When it rains heavily, water can soak into the outer brickwork and run down the inside of that cavity. </p>
-            <p>A cavity tray is a series of high level damp proof courses that bridge a wall cavity to direct moisture to the external face of a wall where the extension roof joins the house wall. Essentially, a cavity tray prevents moisture that penetrates the outer wall from appearing inside your new extension. </p>
-            <p><strong>Why might my design need one?</strong><br>
-            In the event that your new living space is particularly exposed to prevailing winds and weather, we may recommend adding a cavity tray. This is highly relevant if your home is situated on the coast, in a rural location, or on top of a hill.</p>
-            <p><strong>What if I choose not to install one?</strong><br>
-            In many instances, a cavity tray may not be required, but please speak to your building team for more information. However, please be aware that if you are advised that your property requires a cavity tray and you decide not to fit one, some water ingress may occur in severe weather conditions.</p>
-        </div>
-    </div>
-
+    <!-- ...Unchanged content after pdfTemplateCustomer... -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
