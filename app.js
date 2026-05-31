@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const toggleBtn = group.querySelector('.toggle-draw-btn');
         if (!canvasEl) return; 
 
-        // Set to FALSE by default to prevent accidental drawing when scrolling on iPad
+        // Set to FALSE by default to prevent accidental drawing when scrolling on mobile
         const fCanvas = new fabric.Canvas(canvasEl.id, { isDrawingMode: false });
         fCanvas.freeDrawingBrush.color = '#FF0000';
         fCanvas.freeDrawingBrush.width = 4;
@@ -257,37 +257,51 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Set up UI for capture
             const mainApp = document.querySelector('main');
-            window.scrollTo(0, 0); // Scroll to top BEFORE showing template
+            window.scrollTo(0, 0); 
             mainApp.style.display = 'none';
+            
+            // THE ANDROID FIX: Force the body to 800px wide so Chrome doesn't squish the canvas
+            document.body.style.width = '800px';
+            document.body.style.overflow = 'visible';
             template.style.display = 'block';
+            template.style.position = 'absolute';
+            template.style.top = '0';
+            template.style.left = '0';
 
-            // THE MAGIC iPAD PDF CONFIGURATION
             const opt = { 
                 margin: 0,
                 filename: fileName, 
-                image: { type: 'jpeg', quality: 0.98 },
+                image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: { 
-                    scale: 2, 
+                    scale: 1.5, // Safe scale for the shorter Internal PDF
                     useCORS: true, 
                     scrollY: 0,
-                    windowWidth: 800 // <--- THIS FORCES THE iPAD TO RENDER THE FULL WIDTH
+                    scrollX: 0,
+                    windowWidth: 800 
                 }, 
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: 'css' } // Explicitly handles the page breaks
+                pagebreak: { mode: 'css' } 
             };
 
-            // Wait 1 full second for images to load, then capture
+            // Wait for images to load, then capture
             setTimeout(() => {
                 html2pdf().set(opt).from(template).save().then(() => {
+                    // Reset UI
+                    document.body.style.width = '';
+                    document.body.style.overflow = '';
+                    template.style.position = 'static';
                     template.style.display = 'none';
                     mainApp.style.display = 'block';
                 }).catch(err => {
                     console.error("PDF Capture Error:", err);
+                    document.body.style.width = '';
+                    document.body.style.overflow = '';
+                    template.style.position = 'static';
                     template.style.display = 'none';
                     mainApp.style.display = 'block';
                     alert("An error occurred capturing the PDF.");
                 });
-            }, 1000);
+            }, 800);
         });
     }
 
@@ -381,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
             template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
             template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
 
-            // USE COMPRESSED JPEG INSTEAD OF UNCOMPRESSED PNG
+            // USE COMPRESSED JPEG
             const frontCanvas = window.appCanvases['frontelevation'];
             if (frontCanvas) { 
                 frontCanvas.renderAll(); 
@@ -390,37 +404,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Set up UI for capture
             const mainApp = document.querySelector('main');
-            window.scrollTo(0, 0); // Scroll to top BEFORE showing template
+            window.scrollTo(0, 0); 
             mainApp.style.display = 'none';
+            
+            // THE ANDROID FIX: Force the body to 800px wide and absolute position
+            document.body.style.width = '800px';
+            document.body.style.overflow = 'visible';
             template.style.display = 'block';
+            template.style.position = 'absolute';
+            template.style.top = '0';
+            template.style.left = '0';
 
-            // THE MAGIC iPAD PDF CONFIGURATION
             const opt = { 
                 margin: 0,
                 filename: fileName, 
-                image: { type: 'jpeg', quality: 0.98 },
+                image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: { 
-                    scale: 2, 
+                    scale: 1, // LOWER SCALE to bypass Android GPU crash limit on massive documents
                     useCORS: true, 
                     scrollY: 0,
-                    windowWidth: 800 // <--- THIS FORCES THE iPAD TO RENDER THE FULL WIDTH
+                    scrollX: 0,
+                    windowWidth: 800 
                 }, 
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: 'css' } // Explicitly handles the page breaks
+                pagebreak: { mode: 'css' }
             };
 
-            // Wait 1 full second for images to load, then capture
             setTimeout(() => {
                 html2pdf().set(opt).from(template).save().then(() => {
+                    // Reset UI
+                    document.body.style.width = '';
+                    document.body.style.overflow = '';
+                    template.style.position = 'static';
                     template.style.display = 'none';
                     mainApp.style.display = 'block';
                 }).catch(err => {
                     console.error("PDF Capture Error:", err);
+                    document.body.style.width = '';
+                    document.body.style.overflow = '';
+                    template.style.position = 'static';
                     template.style.display = 'none';
                     mainApp.style.display = 'block';
                     alert("An error occurred capturing the PDF.");
                 });
-            }, 1000);
+            }, 800);
         });
     }
 });
