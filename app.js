@@ -56,10 +56,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.removeItem('surveyAppData');
                 inputsToSave.forEach(input => input.value = '');
                 if(dateInput) dateInput.valueAsDate = new Date(); 
+                
+                // Clear Canvases
                 Object.values(window.appCanvases).forEach(fCanvas => {
                     fCanvas.getObjects().forEach(obj => fCanvas.remove(obj));
                     fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
                 });
+                
+                // Clear Multi-Photo Upload Inputs
+                const accessPhotos = document.getElementById('accessPhotos');
+                const miscPhotos = document.getElementById('miscPhotos');
+                if(accessPhotos) accessPhotos.value = '';
+                if(miscPhotos) miscPhotos.value = '';
+
                 window.scrollTo(0, 0);
             }
         });
@@ -74,29 +83,48 @@ document.addEventListener('DOMContentLoaded', function() {
         const canvasEl = group.querySelector('canvas');
         const fileInput = group.querySelector('.camera-input');
         const clearBtn = group.querySelector('.clear-btn');
+        const toggleBtn = group.querySelector('.toggle-draw-btn');
         if (!canvasEl) return; 
 
-        const fCanvas = new fabric.Canvas(canvasEl.id, { isDrawingMode: true });
+        // Set to FALSE by default to prevent accidental drawing when scrolling on iPad
+        const fCanvas = new fabric.Canvas(canvasEl.id, { isDrawingMode: false });
         fCanvas.freeDrawingBrush.color = '#FF0000';
         fCanvas.freeDrawingBrush.width = 4;
         window.appCanvases[id] = fCanvas;
 
-        fileInput.addEventListener('change', function(e) {
-            if (!e.target.files || e.target.files.length === 0) return;
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(f) {
-                const nativeImg = new Image();
-                nativeImg.onload = function() {
-                    const fabricImg = new fabric.Image(nativeImg);
-                    const scale = Math.min(fCanvas.width / fabricImg.width, fCanvas.height / fabricImg.height);
-                    fabricImg.set({ originX: 'center', originY: 'center', scaleX: scale, scaleY: scale, left: fCanvas.width / 2, top: fCanvas.height / 2 });
-                    fCanvas.setBackgroundImage(fabricImg, fCanvas.renderAll.bind(fCanvas));
+        // Toggle Drawing Logic
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                fCanvas.isDrawingMode = !fCanvas.isDrawingMode;
+                if (fCanvas.isDrawingMode) {
+                    toggleBtn.style.background = '#28a745'; // Turn Green
+                    toggleBtn.textContent = '✅ Drawing On (Tap to Lock)';
+                } else {
+                    toggleBtn.style.background = '#0F3759'; // Return to Navy
+                    toggleBtn.textContent = '✏️ Enable Drawing';
+                }
+            });
+        }
+
+        // Image Upload Logic
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                if (!e.target.files || e.target.files.length === 0) return;
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(f) {
+                    const nativeImg = new Image();
+                    nativeImg.onload = function() {
+                        const fabricImg = new fabric.Image(nativeImg);
+                        const scale = Math.min(fCanvas.width / fabricImg.width, fCanvas.height / fabricImg.height);
+                        fabricImg.set({ originX: 'center', originY: 'center', scaleX: scale, scaleY: scale, left: fCanvas.width / 2, top: fCanvas.height / 2 });
+                        fCanvas.setBackgroundImage(fabricImg, fCanvas.renderAll.bind(fCanvas));
+                    };
+                    nativeImg.src = f.target.result;
                 };
-                nativeImg.src = f.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
+                reader.readAsDataURL(file);
+            });
+        }
 
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
@@ -177,8 +205,48 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('pdfDesignerNotes').innerText = data.designerNotes;
             document.getElementById('pdfMiscNotes').innerText = data.miscNotes;
 
-            // HIGH-RES PNG UPGRADE FOR ALL CANVASES
-            ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'miscphotos', 'designersketch'].forEach(id => {
+            // --- INJECT MULTIPLE ACCESS PHOTOS ---
+            const accessPhotosGrid = document.getElementById('pdfAccessPhotosGrid');
+            if (accessPhotosGrid) {
+                accessPhotosGrid.innerHTML = ''; 
+                const accessInput = document.getElementById('accessPhotos');
+                if (accessInput && accessInput.files.length > 0) {
+                    Array.from(accessInput.files).forEach(file => {
+                        let img = document.createElement('img');
+                        img.src = URL.createObjectURL(file);
+                        img.style.width = '100%';
+                        img.style.height = '200px';
+                        img.style.objectFit = 'contain';
+                        img.style.border = '1px solid #dee2e6';
+                        img.style.borderRadius = '4px';
+                        img.style.backgroundColor = '#fff';
+                        accessPhotosGrid.appendChild(img);
+                    });
+                }
+            }
+
+            // --- INJECT MULTIPLE MISC PHOTOS ---
+            const miscPhotosGrid = document.getElementById('pdfMiscPhotosGrid');
+            if (miscPhotosGrid) {
+                miscPhotosGrid.innerHTML = ''; 
+                const miscInput = document.getElementById('miscPhotos');
+                if (miscInput && miscInput.files.length > 0) {
+                    Array.from(miscInput.files).forEach(file => {
+                        let img = document.createElement('img');
+                        img.src = URL.createObjectURL(file);
+                        img.style.width = '100%';
+                        img.style.height = '200px';
+                        img.style.objectFit = 'contain';
+                        img.style.border = '1px solid #dee2e6';
+                        img.style.borderRadius = '4px';
+                        img.style.backgroundColor = '#fff';
+                        miscPhotosGrid.appendChild(img);
+                    });
+                }
+            }
+
+            // HIGH-RES PNG UPGRADE FOR ALL CANVASES (Removed old miscphotos)
+            ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
                 const fCanvas = window.appCanvases[id];
                 const imgTag = document.getElementById(`pdfImgInternal-${id}`);
                 if (fCanvas && imgTag) { 
