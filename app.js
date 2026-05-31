@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ==========================================
     const inputsToSave = document.querySelectorAll('input:not([type="file"]), textarea, select');
     const savedData = JSON.parse(localStorage.getItem('surveyAppData')) || {};
-    
+
     inputsToSave.forEach(input => {
         if (savedData[input.id]) input.value = savedData[input.id];
         input.addEventListener('input', () => {
@@ -56,13 +56,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.removeItem('surveyAppData');
                 inputsToSave.forEach(input => input.value = '');
                 if(dateInput) dateInput.valueAsDate = new Date(); 
-                
+
                 // Clear Canvases
                 Object.values(window.appCanvases).forEach(fCanvas => {
                     fCanvas.getObjects().forEach(obj => fCanvas.remove(obj));
                     fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
                 });
-                
+
                 // Clear Multi-Photo Upload Inputs
                 const accessPhotos = document.getElementById('accessPhotos');
                 const miscPhotos = document.getElementById('miscPhotos');
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
             template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
             template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
             document.getElementById('pdfPrintDesigner').innerText = data.designerName;
-            
+
             document.getElementById('pdfBuildType').innerText = data.buildType;
             document.getElementById('pdfRoofType').innerText = data.roofType;
             document.getElementById('pdfProposedSize').innerText = data.proposedSize;
@@ -259,17 +259,19 @@ document.addEventListener('DOMContentLoaded', function() {
             window.scrollTo(0, 0);
             mainApp.style.display = 'none';
             template.style.display = 'block';
-            
-            // HIGH-RES 4K PDF CONFIGURATION
-            html2pdf().set({ 
-                filename: fileName, 
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 4, useCORS: true, letterRendering: true, scrollY: 0 }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-            }).from(template).save().then(() => {
-                template.style.display = 'none';
-                mainApp.style.display = 'block';
-            });
+
+            // RETINA HD PDF CONFIGURATION (Memory Safe for iPad)
+            setTimeout(() => {
+                html2pdf().set({ 
+                    filename: fileName, 
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, 
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                }).from(template).save().then(() => {
+                    template.style.display = 'none';
+                    mainApp.style.display = 'block';
+                });
+            }, 150);
         });
     }
 
@@ -279,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = getSurveyData();
             const fileName = `${data.clientName.replace(/\s+/g, '')}_Design_Consultation.pdf`;
             const template = document.getElementById('pdfTemplateCustomer');
-            
+
             // --- 1. DYNAMIC LANDING PAGE LOGIC ---
             const clientFirst = data.clientName.split(' ')[0] || 'Customer';
             const build = document.getElementById('buildType').value;
@@ -290,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const planPerm = document.getElementById('planningPerms').value;
             const buildReg = document.getElementById('buildingRegs').value;
             const sap = document.getElementById('sapCalcs').value;
-            
+
             const rawRevDate = document.getElementById('revisitDate') ? document.getElementById('revisitDate').value : '';
             const revDate = rawRevDate ? new Date(rawRevDate).toLocaleDateString('en-GB') : '';
             const revLoc = document.getElementById('revisitLocation') ? document.getElementById('revisitLocation').value : '';
@@ -374,17 +376,19 @@ document.addEventListener('DOMContentLoaded', function() {
             window.scrollTo(0, 0);
             mainApp.style.display = 'none';
             template.style.display = 'block';
-            
-            // HIGH-RES 4K PDF CONFIGURATION
-            html2pdf().set({ 
-                filename: fileName, 
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 4, useCORS: true, letterRendering: true, scrollY: 0 }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-            }).from(template).save().then(() => {
-                template.style.display = 'none';
-                mainApp.style.display = 'block';
-            });
+
+            // RETINA HD PDF CONFIGURATION (Memory Safe for iPad)
+            setTimeout(() => {
+                html2pdf().set({ 
+                    filename: fileName, 
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, 
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                }).from(template).save().then(() => {
+                    template.style.display = 'none';
+                    mainApp.style.display = 'block';
+                });
+            }, 150);
         });
     }
 });
