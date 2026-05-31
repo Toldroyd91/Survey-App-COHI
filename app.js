@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // MEMORY OPTIMIZATION: USE COMPRESSED JPEG INSTEAD OF UNCOMPRESSED PNG
+            // USE COMPRESSED JPEG INSTEAD OF UNCOMPRESSED PNG
             ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
                 const fCanvas = window.appCanvases[id];
                 const imgTag = document.getElementById(`pdfImgInternal-${id}`);
@@ -255,23 +255,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
+            // Set up UI for capture
             const mainApp = document.querySelector('main');
-            window.scrollTo(0, 0);
+            window.scrollTo(0, 0); // Scroll to top BEFORE showing template
             mainApp.style.display = 'none';
             template.style.display = 'block';
 
-            // MEMORY-SAFE PDF CONFIGURATION WITH 600ms RENDER DELAY
+            // THE MAGIC iPAD PDF CONFIGURATION
+            const opt = { 
+                margin: 0,
+                filename: fileName, 
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    scrollY: 0,
+                    windowWidth: 800 // <--- THIS FORCES THE iPAD TO RENDER THE FULL WIDTH
+                }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: 'css' } // Explicitly handles the page breaks
+            };
+
+            // Wait 1 full second for images to load, then capture
             setTimeout(() => {
-                html2pdf().set({ 
-                    filename: fileName, 
-                    image: { type: 'jpeg', quality: 0.95 },
-                    html2canvas: { scale: 1.5, useCORS: true, letterRendering: true, scrollY: 0 }, 
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-                }).from(template).save().then(() => {
+                html2pdf().set(opt).from(template).save().then(() => {
                     template.style.display = 'none';
                     mainApp.style.display = 'block';
+                }).catch(err => {
+                    console.error("PDF Capture Error:", err);
+                    template.style.display = 'none';
+                    mainApp.style.display = 'block';
+                    alert("An error occurred capturing the PDF.");
                 });
-            }, 600);
+            }, 1000);
         });
     }
 
@@ -365,30 +381,46 @@ document.addEventListener('DOMContentLoaded', function() {
             template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
             template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
 
-            // MEMORY OPTIMIZATION: USE COMPRESSED JPEG INSTEAD OF UNCOMPRESSED PNG
+            // USE COMPRESSED JPEG INSTEAD OF UNCOMPRESSED PNG
             const frontCanvas = window.appCanvases['frontelevation'];
             if (frontCanvas) { 
                 frontCanvas.renderAll(); 
                 document.getElementById('pdfImgCustomer-frontelevation').src = frontCanvas.toDataURL({ format: 'jpeg', quality: 0.7 }); 
             }
 
+            // Set up UI for capture
             const mainApp = document.querySelector('main');
-            window.scrollTo(0, 0);
+            window.scrollTo(0, 0); // Scroll to top BEFORE showing template
             mainApp.style.display = 'none';
             template.style.display = 'block';
 
-            // MEMORY-SAFE PDF CONFIGURATION WITH 600ms RENDER DELAY
+            // THE MAGIC iPAD PDF CONFIGURATION
+            const opt = { 
+                margin: 0,
+                filename: fileName, 
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    scrollY: 0,
+                    windowWidth: 800 // <--- THIS FORCES THE iPAD TO RENDER THE FULL WIDTH
+                }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: 'css' } // Explicitly handles the page breaks
+            };
+
+            // Wait 1 full second for images to load, then capture
             setTimeout(() => {
-                html2pdf().set({ 
-                    filename: fileName, 
-                    image: { type: 'jpeg', quality: 0.95 },
-                    html2canvas: { scale: 1.5, useCORS: true, letterRendering: true, scrollY: 0 }, 
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-                }).from(template).save().then(() => {
+                html2pdf().set(opt).from(template).save().then(() => {
                     template.style.display = 'none';
                     mainApp.style.display = 'block';
+                }).catch(err => {
+                    console.error("PDF Capture Error:", err);
+                    template.style.display = 'none';
+                    mainApp.style.display = 'block';
+                    alert("An error occurred capturing the PDF.");
                 });
-            }, 600);
+            }, 1000);
         });
     }
 });
