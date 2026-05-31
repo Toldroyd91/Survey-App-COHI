@@ -135,8 +135,50 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // 4. PDF GENERATION
+    // 4. MANUAL PAGE-BY-PAGE PDF GENERATOR
     // ==========================================
+    async function generatePdfPages(template, fileName, btnEl) {
+        // Find the pages. If no .pdf-page is found, it will try to use the immediate children of the template
+        let pages = template.querySelectorAll('.pdf-page');
+        if (pages.length === 0) {
+            console.warn("No .pdf-page classes found. Attempting to use immediate children as pages.");
+            pages = Array.from(template.children).filter(el => el.tagName !== 'SCRIPT' && el.style.display !== 'none');
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = doc.internal.pageSize.getHeight();
+
+        for (let i = 0; i < pages.length; i++) {
+            // Update button text so you know it hasn't crashed
+            if (btnEl) btnEl.innerText = `Processing Page ${i + 1} of ${pages.length}...`;
+            
+            if (i > 0) doc.addPage();
+            
+            const pageEl = pages[i];
+            
+            // Take picture of ONE page
+            const canvas = await html2canvas(pageEl, {
+                scale: 1.5, // Crisp, but low enough memory to bypass mobile limits
+                useCORS: true,
+                windowWidth: 800,
+                logging: false
+            });
+            
+            // Convert to highly compressed JPEG
+            const imgData = canvas.toDataURL('image/jpeg', 0.85);
+            doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            
+            // CRITICAL FIX: Wipe the canvas from RAM before the next loop
+            canvas.width = 0;
+            canvas.height = 0;
+        }
+
+        if (btnEl) btnEl.innerText = "Downloading PDF...";
+        doc.save(fileName);
+    }
+
     function getSurveyData() {
         const dName = document.getElementById('designerSelect').value || "Surveyor";
         const dProfile = designerProfiles[dName] || { phone: "", email: "", bio: "We will be in touch shortly with your quote." };
@@ -171,7 +213,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const generateInternalBtn = document.getElementById('generateInternalPdfBtn');
     if (generateInternalBtn) {
-        generateInternalBtn.addEventListener('click', function() {
+        generateInternalBtn.addEventListener('click', async function() {
+            const originalText = this.innerText;
+            this.innerText = "Preparing Survey...";
+            this.disabled = true;
+
             const data = getSurveyData();
             const fileName = `${data.clientName.replace(/\s+/g, '')}_Internal_Survey.pdf`;
 
@@ -268,46 +314,34 @@ document.addEventListener('DOMContentLoaded', function() {
             template.style.top = '0';
             template.style.left = '0';
 
-            const opt = { 
-                margin: 0,
-                filename: fileName, 
-                image: { type: 'jpeg', quality: 0.95 },
-                html2canvas: { 
-                    scale: 1.5, // Safe scale for the shorter Internal PDF
-                    useCORS: true, 
-                    scrollY: 0,
-                    scrollX: 0,
-                    windowWidth: 800 
-                }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: 'css' } 
-            };
-
-            // Wait for images to load, then capture
-            setTimeout(() => {
-                html2pdf().set(opt).from(template).save().then(() => {
-                    // Reset UI
-                    document.body.style.width = '';
-                    document.body.style.overflow = '';
-                    template.style.position = 'static';
-                    template.style.display = 'none';
-                    mainApp.style.display = 'block';
-                }).catch(err => {
+            // Give the browser 500ms to render the layout and photos before taking the screenshots
+            setTimeout(async () => {
+                try {
+                    await generatePdfPages(template, fileName, this);
+                } catch (err) {
                     console.error("PDF Capture Error:", err);
-                    document.body.style.width = '';
-                    document.body.style.overflow = '';
-                    template.style.position = 'static';
-                    template.style.display = 'none';
-                    mainApp.style.display = 'block';
                     alert("An error occurred capturing the PDF.");
-                });
-            }, 800);
+                }
+
+                // Reset UI
+                document.body.style.width = '';
+                document.body.style.overflow = '';
+                template.style.position = 'static';
+                template.style.display = 'none';
+                mainApp.style.display = 'block';
+                this.innerText = originalText;
+                this.disabled = false;
+            }, 500);
         });
     }
 
     const generateCustomerBtn = document.getElementById('generateCustomerPdfBtn');
     if (generateCustomerBtn) {
-        generateCustomerBtn.addEventListener('click', function() {
+        generateCustomerBtn.addEventListener('click', async function() {
+            const originalText = this.innerText;
+            this.innerText = "Preparing Consultation...";
+            this.disabled = true;
+
             const data = getSurveyData();
             const fileName = `${data.clientName.replace(/\s+/g, '')}_Design_Consultation.pdf`;
             const template = document.getElementById('pdfTemplateCustomer');
@@ -415,39 +449,24 @@ document.addEventListener('DOMContentLoaded', function() {
             template.style.top = '0';
             template.style.left = '0';
 
-            const opt = { 
-                margin: 0,
-                filename: fileName, 
-                image: { type: 'jpeg', quality: 0.95 },
-                html2canvas: { 
-                    scale: 1, // LOWER SCALE to bypass Android GPU crash limit on massive documents
-                    useCORS: true, 
-                    scrollY: 0,
-                    scrollX: 0,
-                    windowWidth: 800 
-                }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: 'css' }
-            };
-
-            setTimeout(() => {
-                html2pdf().set(opt).from(template).save().then(() => {
-                    // Reset UI
-                    document.body.style.width = '';
-                    document.body.style.overflow = '';
-                    template.style.position = 'static';
-                    template.style.display = 'none';
-                    mainApp.style.display = 'block';
-                }).catch(err => {
+            // Give the browser 500ms to render the layout before capturing
+            setTimeout(async () => {
+                try {
+                    await generatePdfPages(template, fileName, this);
+                } catch (err) {
                     console.error("PDF Capture Error:", err);
-                    document.body.style.width = '';
-                    document.body.style.overflow = '';
-                    template.style.position = 'static';
-                    template.style.display = 'none';
-                    mainApp.style.display = 'block';
                     alert("An error occurred capturing the PDF.");
-                });
-            }, 800);
+                }
+
+                // Reset UI
+                document.body.style.width = '';
+                document.body.style.overflow = '';
+                template.style.position = 'static';
+                template.style.display = 'none';
+                mainApp.style.display = 'block';
+                this.innerText = originalText;
+                this.disabled = false;
+            }, 500);
         });
     }
 });
