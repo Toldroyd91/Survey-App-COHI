@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("[Diagnostics] Engine Started. Loading modules...");
+    console.log("[Diagnostics] Enterprise PDF Engine Started. Loading modules...");
 
     const dateInput = document.getElementById('apptDate');
     if(dateInput && !dateInput.value) {
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
         "James": { phone: "07700 900002", email: "james@cohi.co.uk", defaultBrand: "CO Home Improvements", bio: "Thank you for your time today. I am personally overseeing the initial design phase of your project. We will have your custom 3D concepts and pricing structure ready for review shortly." }
     };
 
-    // YOUR CUSTOM BRAND LOGOS
     const brandLogos = {
         "Clearview": "clearview.png",
         "CO Home Improvements": "logo.jpg",
@@ -57,13 +56,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 inputsToSave.forEach(input => input.value = '');
                 if(dateInput) dateInput.valueAsDate = new Date(); 
 
-                // Clear Canvases
                 Object.values(window.appCanvases).forEach(fCanvas => {
                     fCanvas.getObjects().forEach(obj => fCanvas.remove(obj));
                     fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
                 });
 
-                // Clear Multi-Photo Upload Inputs
                 const accessPhotos = document.getElementById('accessPhotos');
                 const miscPhotos = document.getElementById('miscPhotos');
                 if(accessPhotos) accessPhotos.value = '';
@@ -86,27 +83,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const toggleBtn = group.querySelector('.toggle-draw-btn');
         if (!canvasEl) return; 
 
-        // Set to FALSE by default to prevent accidental drawing when scrolling on mobile
         const fCanvas = new fabric.Canvas(canvasEl.id, { isDrawingMode: false });
         fCanvas.freeDrawingBrush.color = '#FF0000';
         fCanvas.freeDrawingBrush.width = 4;
         window.appCanvases[id] = fCanvas;
 
-        // Toggle Drawing Logic
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 fCanvas.isDrawingMode = !fCanvas.isDrawingMode;
                 if (fCanvas.isDrawingMode) {
-                    toggleBtn.style.background = '#28a745'; // Turn Green
+                    toggleBtn.style.background = '#28a745';
                     toggleBtn.textContent = '✅ Drawing On (Tap to Lock)';
                 } else {
-                    toggleBtn.style.background = '#0F3759'; // Return to Navy
+                    toggleBtn.style.background = '#0F3759';
                     toggleBtn.textContent = '✏️ Enable Drawing';
                 }
             });
         }
 
-        // Image Upload Logic
         if (fileInput) {
             fileInput.addEventListener('change', function(e) {
                 if (!e.target.files || e.target.files.length === 0) return;
@@ -135,50 +129,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // 4. MANUAL PAGE-BY-PAGE PDF GENERATOR
+    // 4. ENTERPRISE PDF GENERATION ENGINE
     // ==========================================
-    async function generatePdfPages(template, fileName, btnEl) {
-        // Find the pages. If no .pdf-page is found, it will try to use the immediate children of the template
-        let pages = template.querySelectorAll('.pdf-page');
-        if (pages.length === 0) {
-            console.warn("No .pdf-page classes found. Attempting to use immediate children as pages.");
-            pages = Array.from(template.children).filter(el => el.tagName !== 'SCRIPT' && el.style.display !== 'none');
-        }
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = doc.internal.pageSize.getWidth();
-        const pdfHeight = doc.internal.pageSize.getHeight();
-
-        for (let i = 0; i < pages.length; i++) {
-            // Update button text so you know it hasn't crashed
-            if (btnEl) btnEl.innerText = `Processing Page ${i + 1} of ${pages.length}...`;
-            
-            if (i > 0) doc.addPage();
-            
-            const pageEl = pages[i];
-            
-            // Take picture of ONE page
-            const canvas = await html2canvas(pageEl, {
-                scale: 1.5, // Crisp, but low enough memory to bypass mobile limits
-                useCORS: true,
-                windowWidth: 800,
-                logging: false
-            });
-            
-            // Convert to highly compressed JPEG
-            const imgData = canvas.toDataURL('image/jpeg', 0.85);
-            doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-            
-            // CRITICAL FIX: Wipe the canvas from RAM before the next loop
-            canvas.width = 0;
-            canvas.height = 0;
-        }
-
-        if (btnEl) btnEl.innerText = "Downloading PDF...";
-        doc.save(fileName);
-    }
-
     function getSurveyData() {
         const dName = document.getElementById('designerSelect').value || "Surveyor";
         const dProfile = designerProfiles[dName] || { phone: "", email: "", bio: "We will be in touch shortly with your quote." };
@@ -211,13 +163,97 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
+    // THE CRASH-PROOF RENDERING LOOP
+    async function executeSecurePDFGeneration(templateId, fileName, triggerBtn) {
+        const originalText = triggerBtn.innerText;
+        triggerBtn.disabled = true;
+        
+        const template = document.getElementById(templateId);
+        const mainApp = document.querySelector('main');
+        
+        // Mobile Viewport Hack to un-squish the template
+        const originalWidth = document.body.style.width;
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.width = '800px';
+        document.body.style.overflow = 'visible';
+        
+        mainApp.style.display = 'none';
+        template.style.display = 'block';
+        template.style.position = 'absolute';
+        template.style.top = '0';
+        template.style.left = '0';
+        template.style.width = '800px';
+        window.scrollTo(0, 0);
+
+        try {
+            // Give DOM 500ms to load images/layouts
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Find pages. Looks for .pdf-page class, falls back to direct children if missing
+            let pages = Array.from(template.querySelectorAll('.pdf-page'));
+            if (pages.length === 0) {
+                pages = Array.from(template.children).filter(el => {
+                    const style = window.getComputedStyle(el);
+                    return style.display !== 'none' && el.tagName !== 'SCRIPT';
+                });
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = doc.internal.pageSize.getWidth();
+
+            for (let i = 0; i < pages.length; i++) {
+                triggerBtn.innerText = `Processing Page ${i + 1} of ${pages.length}...`;
+                await new Promise(resolve => setTimeout(resolve, 100)); // UI breather
+
+                if (i > 0) doc.addPage();
+
+                const canvas = await html2canvas(pages[i], {
+                    scale: 2, // High-Res Retina Quality
+                    useCORS: true,
+                    windowWidth: 800,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                
+                // Calculate correct aspect ratio height to prevent stretching
+                const imgProps = doc.getImageProperties(imgData);
+                const ratio = imgProps.height / imgProps.width;
+                const finalHeight = pdfWidth * ratio;
+
+                doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, finalHeight);
+
+                // EXTREMELY CRITICAL: Free up device GPU memory immediately
+                canvas.width = 0;
+                canvas.height = 0;
+            }
+
+            triggerBtn.innerText = "Finalizing Document...";
+            doc.save(fileName);
+
+        } catch (error) {
+            console.error("Critical rendering failure:", error);
+            alert("A rendering error occurred. Please ensure all photos are fully loaded.");
+        } finally {
+            // Restore original UI state
+            document.body.style.width = originalWidth;
+            document.body.style.overflow = originalOverflow;
+            template.style.display = 'none';
+            template.style.position = '';
+            template.style.top = '';
+            template.style.left = '';
+            template.style.width = '';
+            mainApp.style.display = 'block';
+            triggerBtn.innerText = originalText;
+            triggerBtn.disabled = false;
+        }
+    }
+
     const generateInternalBtn = document.getElementById('generateInternalPdfBtn');
     if (generateInternalBtn) {
         generateInternalBtn.addEventListener('click', async function() {
-            const originalText = this.innerText;
-            this.innerText = "Preparing Survey...";
-            this.disabled = true;
-
             const data = getSurveyData();
             const fileName = `${data.clientName.replace(/\s+/g, '')}_Internal_Survey.pdf`;
 
@@ -291,57 +327,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // USE COMPRESSED JPEG INSTEAD OF UNCOMPRESSED PNG
+            // High-res JPEG injection for canvases
             ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
                 const fCanvas = window.appCanvases[id];
                 const imgTag = document.getElementById(`pdfImgInternal-${id}`);
                 if (fCanvas && imgTag) { 
                     fCanvas.renderAll(); 
-                    imgTag.src = fCanvas.toDataURL({ format: 'jpeg', quality: 0.7 }); 
+                    imgTag.src = fCanvas.toDataURL({ format: 'jpeg', quality: 0.95 }); 
                 }
             });
 
-            // Set up UI for capture
-            const mainApp = document.querySelector('main');
-            window.scrollTo(0, 0); 
-            mainApp.style.display = 'none';
-            
-            // THE ANDROID FIX: Force the body to 800px wide so Chrome doesn't squish the canvas
-            document.body.style.width = '800px';
-            document.body.style.overflow = 'visible';
-            template.style.display = 'block';
-            template.style.position = 'absolute';
-            template.style.top = '0';
-            template.style.left = '0';
-
-            // Give the browser 500ms to render the layout and photos before taking the screenshots
-            setTimeout(async () => {
-                try {
-                    await generatePdfPages(template, fileName, this);
-                } catch (err) {
-                    console.error("PDF Capture Error:", err);
-                    alert("An error occurred capturing the PDF.");
-                }
-
-                // Reset UI
-                document.body.style.width = '';
-                document.body.style.overflow = '';
-                template.style.position = 'static';
-                template.style.display = 'none';
-                mainApp.style.display = 'block';
-                this.innerText = originalText;
-                this.disabled = false;
-            }, 500);
+            // Launch the secure generation engine
+            await executeSecurePDFGeneration('pdfTemplateInternal', fileName, this);
         });
     }
 
     const generateCustomerBtn = document.getElementById('generateCustomerPdfBtn');
     if (generateCustomerBtn) {
         generateCustomerBtn.addEventListener('click', async function() {
-            const originalText = this.innerText;
-            this.innerText = "Preparing Consultation...";
-            this.disabled = true;
-
             const data = getSurveyData();
             const fileName = `${data.clientName.replace(/\s+/g, '')}_Design_Consultation.pdf`;
             const template = document.getElementById('pdfTemplateCustomer');
@@ -400,13 +403,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // --- 2. DYNAMIC PAMPHLET LOGIC ---
             const selectedWeepVents = document.getElementById('weepventsExist').value;
 
-            // Reset all conditional pamphlets to hidden first
             document.getElementById('pamphlet-sap').style.display = 'none';
             document.getElementById('pamphlet-planning-full').style.display = 'none';
             document.getElementById('pamphlet-planning-pre').style.display = 'none';
             document.getElementById('pamphlet-cavity').style.display = 'none';
 
-            // Evaluate and turn on the required pamphlets
             if (sap === 'Yes') {
                 document.getElementById('pamphlet-sap').style.display = 'block';
             }
@@ -429,44 +430,15 @@ document.addEventListener('DOMContentLoaded', function() {
             template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
             template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
 
-            // USE COMPRESSED JPEG
+            // High-res JPEG injection for front elevation cover
             const frontCanvas = window.appCanvases['frontelevation'];
             if (frontCanvas) { 
                 frontCanvas.renderAll(); 
-                document.getElementById('pdfImgCustomer-frontelevation').src = frontCanvas.toDataURL({ format: 'jpeg', quality: 0.7 }); 
+                document.getElementById('pdfImgCustomer-frontelevation').src = frontCanvas.toDataURL({ format: 'jpeg', quality: 0.95 }); 
             }
 
-            // Set up UI for capture
-            const mainApp = document.querySelector('main');
-            window.scrollTo(0, 0); 
-            mainApp.style.display = 'none';
-            
-            // THE ANDROID FIX: Force the body to 800px wide and absolute position
-            document.body.style.width = '800px';
-            document.body.style.overflow = 'visible';
-            template.style.display = 'block';
-            template.style.position = 'absolute';
-            template.style.top = '0';
-            template.style.left = '0';
-
-            // Give the browser 500ms to render the layout before capturing
-            setTimeout(async () => {
-                try {
-                    await generatePdfPages(template, fileName, this);
-                } catch (err) {
-                    console.error("PDF Capture Error:", err);
-                    alert("An error occurred capturing the PDF.");
-                }
-
-                // Reset UI
-                document.body.style.width = '';
-                document.body.style.overflow = '';
-                template.style.position = 'static';
-                template.style.display = 'none';
-                mainApp.style.display = 'block';
-                this.innerText = originalText;
-                this.disabled = false;
-            }, 500);
+            // Launch the secure generation engine
+            await executeSecurePDFGeneration('pdfTemplateCustomer', fileName, this);
         });
     }
 });
