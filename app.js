@@ -245,13 +245,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // HIGH-RES PNG UPGRADE FOR ALL CANVASES (Removed old miscphotos)
+            // MEMORY OPTIMIZATION: USE COMPRESSED JPEG INSTEAD OF UNCOMPRESSED PNG
             ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
                 const fCanvas = window.appCanvases[id];
                 const imgTag = document.getElementById(`pdfImgInternal-${id}`);
                 if (fCanvas && imgTag) { 
                     fCanvas.renderAll(); 
-                    imgTag.src = fCanvas.toDataURL({ format: 'png' }); 
+                    imgTag.src = fCanvas.toDataURL({ format: 'jpeg', quality: 0.7 }); 
                 }
             });
 
@@ -260,18 +260,18 @@ document.addEventListener('DOMContentLoaded', function() {
             mainApp.style.display = 'none';
             template.style.display = 'block';
 
-            // RETINA HD PDF CONFIGURATION (Memory Safe for iPad)
+            // MEMORY-SAFE PDF CONFIGURATION WITH 600ms RENDER DELAY
             setTimeout(() => {
                 html2pdf().set({ 
                     filename: fileName, 
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, 
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: 1.5, useCORS: true, letterRendering: true, scrollY: 0 }, 
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
                 }).from(template).save().then(() => {
                     template.style.display = 'none';
                     mainApp.style.display = 'block';
                 });
-            }, 150);
+            }, 600);
         });
     }
 
@@ -365,11 +365,11 @@ document.addEventListener('DOMContentLoaded', function() {
             template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
             template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
 
-            // HIGH-RES PNG UPGRADE FOR COVER PHOTO
+            // MEMORY OPTIMIZATION: USE COMPRESSED JPEG INSTEAD OF UNCOMPRESSED PNG
             const frontCanvas = window.appCanvases['frontelevation'];
             if (frontCanvas) { 
                 frontCanvas.renderAll(); 
-                document.getElementById('pdfImgCustomer-frontelevation').src = frontCanvas.toDataURL({ format: 'png' }); 
+                document.getElementById('pdfImgCustomer-frontelevation').src = frontCanvas.toDataURL({ format: 'jpeg', quality: 0.7 }); 
             }
 
             const mainApp = document.querySelector('main');
@@ -377,18 +377,18 @@ document.addEventListener('DOMContentLoaded', function() {
             mainApp.style.display = 'none';
             template.style.display = 'block';
 
-            // RETINA HD PDF CONFIGURATION (Memory Safe for iPad)
+            // MEMORY-SAFE PDF CONFIGURATION WITH 600ms RENDER DELAY
             setTimeout(() => {
                 html2pdf().set({ 
                     filename: fileName, 
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, 
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: 1.5, useCORS: true, letterRendering: true, scrollY: 0 }, 
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
                 }).from(template).save().then(() => {
                     template.style.display = 'none';
                     mainApp.style.display = 'block';
                 });
-            }, 150);
+            }, 600);
         });
     }
 });
