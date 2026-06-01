@@ -72,14 +72,11 @@ body {
   margin-bottom: 20px;
 }
 
-.card__header {
-  margin-bottom: 20px;
-}
-
 .card__title {
   color: var(--primary-text);
   font-size: 1.2rem;
   font-weight: 600;
+  margin-bottom: 20px;
 }
 
 .form-group {
@@ -94,13 +91,9 @@ body {
   color: var(--secondary-text);
   margin-bottom: 7px;
   font-weight: 500;
-  letter-spacing: 0.01em;
 }
 
-.form-group__input,
-.form-group__input--touch,
-.form-group__input--select,
-textarea {
+.form-group__input, textarea, select {
   background: var(--input-bg);
   color: var(--primary-text);
   border: none;
@@ -110,42 +103,14 @@ textarea {
   padding: 16px;
   width: 100%;
   outline: none;
-  transition: box-shadow 0.18s, border-color 0.18s;
-  box-shadow: none;
-  appearance: none;
   font-family: inherit;
 }
 
-.form-group__input:focus,
-.form-group__input--touch:focus,
-.form-group__input--select:focus,
-select:focus,
-textarea:focus {
+.form-group__input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 2px var(--accent);
-  border: none;
 }
 
-select.form-group__input,
-select.form-group__input--select,
-select.form-group__input--touch {
-  padding-right: 38px;
-  cursor: pointer;
-}
-
-::-webkit-input-placeholder,
-::placeholder {
-  color: var(--secondary-text);
-  opacity: 1;
-}
-
-input:-webkit-autofill,
-select:-webkit-autofill {
-  box-shadow: 0 0 0 30px var(--input-bg) inset !important;
-  -webkit-text-fill-color: var(--primary-text) !important;
-}
-
-button,
-.button {
+button {
   background: var(--accent);
   color: #fff;
   border: none;
@@ -155,38 +120,7 @@ button,
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
-  display: block;
   margin-top: 16px;
-  transition: transform 0.06s cubic-bezier(0.7,0.2,0.25,1), box-shadow 0.18s;
-  box-shadow: 0 2px 8px rgba(13,110,253,0.11);
-}
-
-button:active,
-.button:active {
-  transform: scale(0.98);
-  box-shadow: 0 1px 4px rgba(13,110,253,0.16);
-}
-
-@media (max-width: 900px) {
-  .main-container {
-    padding: 14px;
-  }
-  .card {
-    padding: 18px;
-  }
-}
-
-@media (max-width: 600px) {
-  .main-container {
-    max-width: 100vw;
-    padding: 6vw;
-  }
-  .card {
-    padding: 4vw;
-  }
-  .navbar__title {
-    font-size: 1.16rem;
-  }
 }
 
 /* --- FABRIC.JS VISIBILITY PATCH --- */
@@ -195,13 +129,12 @@ button:active,
     border-radius: 8px;
     overflow: hidden;
 }
-
 canvas.upper-canvas {
     background-color: transparent !important; 
 }
 
 /* --- PDF PAGE BREAK PROTECTION --- */
-.card {
+.card, .pdf-page {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
 }
