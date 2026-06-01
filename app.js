@@ -13,16 +13,71 @@ document.addEventListener('DOMContentLoaded', function() {
         "Planet": "planet.png", "Trent Valley Windows": "trentvalley.png", "West Yorkshire Windows": "westyorkshire.png",
         "Yorkshire Windows": "yorkshire.png"
     };
-
-    // Canvas Initialization
+    // Canvas Initialization & Event Listeners
     window.appCanvases = {};
     document.querySelectorAll('.canvas-group').forEach(group => {
         const id = group.getAttribute('data-id');
         const canvasEl = group.querySelector('canvas');
+        const toggleBtn = group.querySelector('.toggle-draw-btn');
+        const clearBtn = group.querySelector('.clear-btn');
+        const fileInput = group.querySelector('.camera-input');
+
         if (canvasEl) {
-            window.appCanvases[id] = new fabric.Canvas(canvasEl.id, { isDrawingMode: false });
+            const fCanvas = new fabric.Canvas(canvasEl.id, { isDrawingMode: false });
+            fCanvas.freeDrawingBrush.color = '#FF0000';
+            fCanvas.freeDrawingBrush.width = 4;
+            window.appCanvases[id] = fCanvas;
+
+            // 1. Listen for Draw Button Clicks
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    fCanvas.isDrawingMode = !fCanvas.isDrawingMode;
+                    if (fCanvas.isDrawingMode) {
+                        toggleBtn.style.background = '#28a745';
+                        toggleBtn.textContent = '✅ Drawing On (Tap to Lock)';
+                    } else {
+                        toggleBtn.style.background = '#0F3759';
+                        toggleBtn.textContent = '✏️ Enable Drawing';
+                    }
+                });
+            }
+
+            // 2. Listen for Clear Button Clicks
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    fCanvas.getObjects().forEach(obj => fCanvas.remove(obj));
+                    fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
+                    if (fileInput) fileInput.value = '';
+                });
+            }
+
+            // 3. Listen for Photo Uploads
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    if (!e.target.files || e.target.files.length === 0) return;
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(f) {
+                        const nativeImg = new Image();
+                        nativeImg.onload = function() {
+                            const fabricImg = new fabric.Image(nativeImg);
+                            // Scale image perfectly to fit inside the canvas
+                            const scale = Math.min(fCanvas.width / fabricImg.width, fCanvas.height / fabricImg.height);
+                            fabricImg.set({ 
+                                originX: 'center', originY: 'center', 
+                                scaleX: scale, scaleY: scale, 
+                                left: fCanvas.width / 2, top: fCanvas.height / 2 
+                            });
+                            fCanvas.setBackgroundImage(fabricImg, fCanvas.renderAll.bind(fCanvas));
+                        };
+                        nativeImg.src = f.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
         }
     });
+
 
     // --- SECURE LOGO CONVERTER ---
     // This stops Apple iOS from crashing the app due to local file security rules
