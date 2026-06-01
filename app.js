@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 3. ENTERPRISE PDF RENDER ENGINE
+    // 3. ENTERPRISE PDF RENDER ENGINE (GHOST RENDER)
     // ==========================================
     async function loadImagesInGrid(gridId, inputId) {
         const grid = document.getElementById(gridId);
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
             img.style.border = '1px solid #dee2e6';
             img.style.backgroundColor = '#fff';
             img.onload = () => { grid.appendChild(img); resolve(); };
-            img.onerror = resolve;
+            img.onerror = resolve; // Resolve anyway so it doesn't hang
         }));
         await Promise.all(promises);
     }
@@ -144,10 +144,11 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerText = "Initializing Engine...";
 
         const template = document.getElementById(templateId);
-        const mainApp = document.querySelector('main');
+        const mainApp = document.querySelector('main') || document.body.firstElementChild;
         
         // --- THE GHOST RENDER FIX ---
-        // Keeps the template in the rendering tree, bypassing the 0x0 display:none bug
+        // Instead of display: none (which creates a 0x0 blank image), we fade out the main app
+        // and push the template 9999px off-screen so the phone's GPU still renders it perfectly.
         const originalOpacity = mainApp.style.opacity;
         const originalPointerEvents = mainApp.style.pointerEvents;
         
@@ -159,19 +160,20 @@ document.addEventListener('DOMContentLoaded', function() {
         template.style.top = '0';
         template.style.left = '-9999px'; 
         template.style.width = '800px';
+        window.scrollTo(0, 0);
 
         try {
             btn.innerText = "Loading Photos...";
             await loadImagesInGrid('pdfAccessPhotosGrid', 'accessPhotos');
             await loadImagesInGrid('pdfMiscPhotosGrid', 'miscPhotos');
             
-            // Critical pause to allow the hardware GPU to paint the DOM
-            await new Promise(r => setTimeout(r, 800)); 
+            // Give the browser 1 full second to paint the new layout
+            await new Promise(r => setTimeout(r, 1000)); 
 
             const doc = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = doc.internal.pageSize.getWidth();
             
-            // Automatic Fallback Logic - Finds pages even if you didn't mark them
+            // Auto-detect pages
             let pages = Array.from(template.querySelectorAll('.pdf-page'));
             if (pages.length === 0) {
                 pages = Array.from(template.children).filter(el => {
@@ -184,10 +186,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.innerText = `Rendering Page ${i+1}/${pages.length}...`;
                 
                 const canvas = await html2canvas(pages[i], {
-                    scale: 1.5, // Retina Resolution, safe from GPU crashes
+                    scale: 1.5,
                     useCORS: true,
+                    allowTaint: true,
                     windowWidth: 800,
-                    logging: false
+                    logging: false,
+                    backgroundColor: '#ffffff'
                 });
                 
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
@@ -197,16 +201,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (i > 0) doc.addPage();
                 doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfWidth * ratio);
                 
-                canvas.width = 0; // Crucial Memory Wipe step
+                canvas.width = 0; // Wipe memory to prevent crashes
+                canvas.height = 0;
             }
 
             btn.innerText = "Finalizing PDF...";
             doc.save(fileName);
         } catch (error) {
             console.error("CAPTURE FAILED:", error);
-            alert("Capture Failed. Ensure images are valid.");
+            alert("Capture Failed. Please try again.");
         } finally {
-            // Smoothly restore the UI state
+            // Restore UI seamlessly
             template.style.display = 'none';
             template.style.position = '';
             template.style.top = '';
