@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
             img.style.border = '1px solid #dee2e6';
             img.style.backgroundColor = '#fff';
             img.onload = () => { grid.appendChild(img); resolve(); };
-            img.onerror = resolve; // Resolve anyway so it doesn't hang
+            img.onerror = resolve; 
         }));
         await Promise.all(promises);
     }
@@ -146,9 +146,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const template = document.getElementById(templateId);
         const mainApp = document.querySelector('main') || document.body.firstElementChild;
         
-        // --- THE GHOST RENDER FIX ---
-        // Instead of display: none (which creates a 0x0 blank image), we fade out the main app
-        // and push the template 9999px off-screen so the phone's GPU still renders it perfectly.
         const originalOpacity = mainApp.style.opacity;
         const originalPointerEvents = mainApp.style.pointerEvents;
         
@@ -166,14 +163,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerText = "Loading Photos...";
             await loadImagesInGrid('pdfAccessPhotosGrid', 'accessPhotos');
             await loadImagesInGrid('pdfMiscPhotosGrid', 'miscPhotos');
-            
-            // Give the browser 1 full second to paint the new layout
-            await new Promise(r => setTimeout(r, 1000)); 
+            await new Promise(r => setTimeout(r, 800)); 
 
             const doc = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = doc.internal.pageSize.getWidth();
             
-            // Auto-detect pages
+            // --- PROFESSIONAL MARGIN SETUP ---
+            const margin = 10; // 10mm beautiful corporate border
+            const pdfPrintWidth = doc.internal.pageSize.getWidth() - (margin * 2); 
+            
             let pages = Array.from(template.querySelectorAll('.pdf-page'));
             if (pages.length === 0) {
                 pages = Array.from(template.children).filter(el => {
@@ -186,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.innerText = `Rendering Page ${i+1}/${pages.length}...`;
                 
                 const canvas = await html2canvas(pages[i], {
-                    scale: 1.5,
+                    scale: 2, // HIGH QUALITY RESTORED
                     useCORS: true,
                     allowTaint: true,
                     windowWidth: 800,
@@ -194,14 +191,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     backgroundColor: '#ffffff'
                 });
                 
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const imgData = canvas.toDataURL('image/jpeg', 1.0); // MAX QUALITY JPEG
                 const imgProps = doc.getImageProperties(imgData);
                 const ratio = imgProps.height / imgProps.width;
+                const pdfPrintHeight = pdfPrintWidth * ratio;
                 
                 if (i > 0) doc.addPage();
-                doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfWidth * ratio);
                 
-                canvas.width = 0; // Wipe memory to prevent crashes
+                // Print with margins (X, Y, Width, Height)
+                doc.addImage(imgData, 'JPEG', margin, margin, pdfPrintWidth, pdfPrintHeight);
+                
+                canvas.width = 0; 
                 canvas.height = 0;
             }
 
@@ -211,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("CAPTURE FAILED:", error);
             alert("Capture Failed. Please try again.");
         } finally {
-            // Restore UI seamlessly
             template.style.display = 'none';
             template.style.position = '';
             template.style.top = '';
@@ -225,35 +224,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 4. DATA BINDING & GENERATION
+    // 4. BULLETPROOF DATA BINDING
     // ==========================================
+    // Uses optional chaining (?.) so empty fields NEVER crash the app
     function getSurveyData() {
-        const dName = document.getElementById('designerSelect').value || "Surveyor";
-        const dProfile = designerProfiles[dName] || { phone: "", email: "", bio: "..." };
-        const selectedBrand = document.getElementById('brandSelect').value;
+        const dName = document.getElementById('designerSelect')?.value || "Surveyor";
+        const dProfile = designerProfiles[dName] || { phone: "", email: "", bio: "We will be in touch shortly." };
+        const selectedBrand = document.getElementById('brandSelect')?.value || "CO Home Improvements";
         
         return {
-            clientName: document.getElementById('clientName').value || 'Customer',
-            clientNum: document.getElementById('clientNum').value || '',
-            address: document.getElementById('postCode').value || '',
-            date: document.getElementById('apptDate').value ? new Date(document.getElementById('apptDate').value).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
-            buildType: document.getElementById('buildType').value || '',
-            roofType: document.getElementById('roofType').value || '',
-            proposedSize: document.getElementById('proposedSize').value || '',
-            frameColour: document.getElementById('frameColour').value || '',
-            houseMaterial: document.getElementById('houseMaterial').value || '',
-            dpcDepth: document.getElementById('dpcDepth').value || '',
-            fasciaHeight: document.getElementById('fasciaHeight').value || '',
-            airBricks: document.getElementById('airbricks').value || '',
-            buildingRegs: document.getElementById('buildingRegs').value || '',
-            planningPerms: document.getElementById('planningPerms').value || '',
-            sapCalcs: document.getElementById('sapCalcs').value || '',
-            budget: document.getElementById('budget').value || '',
-            accessDifficult: document.getElementById('accessDifficult').value || '',
-            accessWidth: document.getElementById('accessWidth').value || '',
-            wallObstacles: document.getElementById('wallObstacles').value || '',
-            designerNotes: document.getElementById('designerNotes').value || '',
-            miscNotes: document.getElementById('miscNotes').value || '',
+            clientName: document.getElementById('clientName')?.value || 'Customer',
+            clientNum: document.getElementById('clientNum')?.value || '',
+            address: document.getElementById('postCode')?.value || '',
+            date: document.getElementById('apptDate')?.value ? new Date(document.getElementById('apptDate').value).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+            buildType: document.getElementById('buildType')?.value || '',
+            roofType: document.getElementById('roofType')?.value || '',
+            proposedSize: document.getElementById('proposedSize')?.value || '',
+            frameColour: document.getElementById('frameColour')?.value || '',
+            houseMaterial: document.getElementById('houseMaterial')?.value || '',
+            dpcDepth: document.getElementById('dpcDepth')?.value || '',
+            fasciaHeight: document.getElementById('fasciaHeight')?.value || '',
+            airBricks: document.getElementById('airbricks')?.value || '',
+            buildingRegs: document.getElementById('buildingRegs')?.value || '',
+            planningPerms: document.getElementById('planningPerms')?.value || '',
+            sapCalcs: document.getElementById('sapCalcs')?.value || '',
+            budget: document.getElementById('budget')?.value || '',
+            accessDifficult: document.getElementById('accessDifficult')?.value || '',
+            accessWidth: document.getElementById('accessWidth')?.value || '',
+            wallObstacles: document.getElementById('wallObstacles')?.value || '',
+            designerNotes: document.getElementById('designerNotes')?.value || '',
+            miscNotes: document.getElementById('miscNotes')?.value || '',
             designerName: dName, 
             designerPhone: dProfile.phone, 
             designerEmail: dProfile.email, 
@@ -266,24 +266,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = getSurveyData();
         const template = document.getElementById('pdfTemplateInternal');
         
-        template.querySelectorAll('.bind-name').forEach(el => el.innerText = data.clientName);
-        template.querySelectorAll('.bind-num').forEach(el => el.innerText = data.clientNum);
-        template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
-        template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
-        
-        const designerEl = document.getElementById('pdfPrintDesigner');
-        if (designerEl) designerEl.innerText = data.designerName;
-        
-        ['BuildType', 'RoofType', 'ProposedSize', 'FrameColour', 'HouseMaterial', 'DpcDepth', 'FasciaHeight', 'AirBricks', 'BuildingRegs', 'PlanningPerms', 'SapCalcs', 'Budget', 'AccessDifficult', 'AccessWidth', 'WallObstacles', 'DesignerNotes', 'MiscNotes'].forEach(key => {
-            const el = document.getElementById(`pdf${key}`);
-            if (el) el.innerText = data[key.charAt(0).toLowerCase() + key.slice(1)];
-        });
-        
-        ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
-            const fCanvas = window.appCanvases[id];
-            const imgTag = document.getElementById(`pdfImgInternal-${id}`);
-            if (fCanvas && imgTag) { fCanvas.renderAll(); imgTag.src = fCanvas.toDataURL({ format: 'jpeg', quality: 0.95 }); }
-        });
+        try {
+            template.querySelectorAll('.brand-logo-img').forEach(img => img.src = data.logoSource);
+            template.querySelectorAll('.bind-name').forEach(el => el.innerText = data.clientName);
+            template.querySelectorAll('.bind-num').forEach(el => el.innerText = data.clientNum);
+            template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
+            template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
+            
+            const designerEl = document.getElementById('pdfPrintDesigner');
+            if (designerEl) designerEl.innerText = data.designerName;
+            
+            ['BuildType', 'RoofType', 'ProposedSize', 'FrameColour', 'HouseMaterial', 'DpcDepth', 'FasciaHeight', 'AirBricks', 'BuildingRegs', 'PlanningPerms', 'SapCalcs', 'Budget', 'AccessDifficult', 'AccessWidth', 'WallObstacles', 'DesignerNotes', 'MiscNotes'].forEach(key => {
+                const el = document.getElementById(`pdf${key}`);
+                if (el) el.innerText = data[key.charAt(0).toLowerCase() + key.slice(1)];
+            });
+            
+            ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
+                const fCanvas = window.appCanvases[id];
+                const imgTag = document.getElementById(`pdfImgInternal-${id}`);
+                if (fCanvas && imgTag) { fCanvas.renderAll(); imgTag.src = fCanvas.toDataURL({ format: 'jpeg', quality: 1.0 }); }
+            });
+        } catch (e) {
+            console.warn("Minor binding issue, bypassing:", e);
+        }
 
         await executeSecurePDFGeneration('pdfTemplateInternal', `${data.clientName.replace(/\s+/g, '')}_Internal_Survey.pdf`, this);
     });
@@ -292,51 +297,58 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = getSurveyData();
         const template = document.getElementById('pdfTemplateCustomer');
         
-        const greetingEl = document.getElementById('lp-greeting');
-        if (greetingEl) greetingEl.innerHTML = `Hi ${data.clientName.split(' ')[0]},<br><br>I want to say a massive thank you for inviting me into your home today. I’ve put together this summary document outlining the major talking points from our appointment so we both know we are on exactly the right lines. If there is anything you'd like to adjust, please don't hesitate to get in touch.`;
-        
-        const bioEl = document.getElementById('pdfDesignerBio');
-        if(bioEl) bioEl.innerText = data.designerBio;
-        
-        const nameEl = document.getElementById('pdfDesignerName');
-        if(nameEl) nameEl.innerText = data.designerName;
-        
-        const contactEl = document.getElementById('pdfDesignerContact');
-        if(contactEl) contactEl.innerText = `${data.designerPhone} | ${data.designerEmail}`;
-        
-        template.querySelectorAll('.bind-name').forEach(el => el.innerText = data.clientName);
-        template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
-        template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
-        
-        const selectedWeepVents = document.getElementById('weepventsExist')?.value;
+        try {
+            template.querySelectorAll('.brand-logo-img').forEach(img => img.src = data.logoSource);
 
-        ['pamphlet-sap', 'pamphlet-planning-full', 'pamphlet-planning-pre', 'pamphlet-cavity'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
+            const greetingEl = document.getElementById('lp-greeting');
+            const firstName = data.clientName ? data.clientName.split(' ')[0] : 'Customer';
+            if (greetingEl) greetingEl.innerHTML = `Hi ${firstName},<br><br>I want to say a massive thank you for inviting me into your home today. I’ve put together this summary document outlining the major talking points from our appointment so we both know we are on exactly the right lines. If there is anything you'd like to adjust, please don't hesitate to get in touch.`;
+            
+            const bioEl = document.getElementById('pdfDesignerBio');
+            if(bioEl) bioEl.innerText = data.designerBio;
+            
+            const nameEl = document.getElementById('pdfDesignerName');
+            if(nameEl) nameEl.innerText = data.designerName;
+            
+            const contactEl = document.getElementById('pdfDesignerContact');
+            if(contactEl) contactEl.innerText = `${data.designerPhone} | ${data.designerEmail}`;
+            
+            template.querySelectorAll('.bind-name').forEach(el => el.innerText = data.clientName);
+            template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
+            template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
+            
+            const selectedWeepVents = document.getElementById('weepventsExist')?.value;
 
-        if (data.sapCalcs === 'Yes') {
-            const el = document.getElementById('pamphlet-sap');
-            if(el) el.style.display = 'block';
-        }
-        if (data.planningPerms === 'Full Planning') {
-            const el = document.getElementById('pamphlet-planning-full');
-            if(el) el.style.display = 'block';
-        }
-        if (data.planningPerms === 'Pre Approved Planning') {
-            const el = document.getElementById('pamphlet-planning-pre');
-            if(el) el.style.display = 'block';
-        }
-        if (data.buildType === 'Extension' && selectedWeepVents === 'Yes') {
-            const el = document.getElementById('pamphlet-cavity');
-            if(el) el.style.display = 'block';
-        }
+            ['pamphlet-sap', 'pamphlet-planning-full', 'pamphlet-planning-pre', 'pamphlet-cavity'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
 
-        const frontCanvas = window.appCanvases['frontelevation'];
-        if (frontCanvas) { 
-            frontCanvas.renderAll(); 
-            const imgEl = document.getElementById('pdfImgCustomer-frontelevation');
-            if (imgEl) imgEl.src = frontCanvas.toDataURL({ format: 'jpeg', quality: 0.95 }); 
+            if (data.sapCalcs === 'Yes') {
+                const el = document.getElementById('pamphlet-sap');
+                if(el) el.style.display = 'block';
+            }
+            if (data.planningPerms === 'Full Planning') {
+                const el = document.getElementById('pamphlet-planning-full');
+                if(el) el.style.display = 'block';
+            }
+            if (data.planningPerms === 'Pre Approved Planning') {
+                const el = document.getElementById('pamphlet-planning-pre');
+                if(el) el.style.display = 'block';
+            }
+            if (data.buildType === 'Extension' && selectedWeepVents === 'Yes') {
+                const el = document.getElementById('pamphlet-cavity');
+                if(el) el.style.display = 'block';
+            }
+
+            const frontCanvas = window.appCanvases['frontelevation'];
+            if (frontCanvas) { 
+                frontCanvas.renderAll(); 
+                const imgEl = document.getElementById('pdfImgCustomer-frontelevation');
+                if (imgEl) imgEl.src = frontCanvas.toDataURL({ format: 'jpeg', quality: 1.0 }); 
+            }
+        } catch (e) {
+            console.warn("Minor binding issue, bypassing:", e);
         }
 
         await executeSecurePDFGeneration('pdfTemplateCustomer', `${data.clientName.replace(/\s+/g, '')}_Consultation.pdf`, this);
