@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("[Diagnostics] Enterprise Engine Started. Loading modules...");
+    console.log("[Diagnostics] Final Boardroom Engine Started...");
 
     const { jsPDF } = window.jspdf;
 
@@ -105,35 +105,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
                 });
 
-                const accessPhotos = document.getElementById('accessPhotos');
-                const miscPhotos = document.getElementById('miscPhotos');
-                if(accessPhotos) accessPhotos.value = '';
-                if(miscPhotos) miscPhotos.value = '';
-
+                document.getElementById('accessPhotos').value = '';
+                document.getElementById('miscPhotos').value = '';
                 window.scrollTo(0, 0);
             }
         });
     }
 
     // ==========================================
-    // 3. ENTERPRISE PDF RENDER ENGINE (GHOST RENDER)
+    // 3. ENTERPRISE PDF RENDER ENGINE (VISIBLE OVERLAY MODE)
     // ==========================================
+    // Converts files to pure Base64 strings to bypass ALL mobile security restrictions
     async function loadImagesInGrid(gridId, inputId) {
         const grid = document.getElementById(gridId);
         const input = document.getElementById(inputId);
         if(!grid || !input || input.files.length === 0) return;
         grid.innerHTML = '';
+        
         const promises = Array.from(input.files).map(file => new Promise(resolve => {
-            const img = document.createElement('img');
-            img.crossOrigin = "anonymous";
-            img.src = URL.createObjectURL(file);
-            img.style.width = '100%';
-            img.style.height = '200px';
-            img.style.objectFit = 'contain';
-            img.style.border = '1px solid #dee2e6';
-            img.style.backgroundColor = '#fff';
-            img.onload = () => { grid.appendChild(img); resolve(); };
-            img.onerror = resolve; 
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result; // Base64 injection
+                img.style.width = '100%';
+                img.style.height = '200px';
+                img.style.objectFit = 'contain';
+                img.style.border = '1px solid #dee2e6';
+                img.style.backgroundColor = '#fff';
+                img.onload = () => { grid.appendChild(img); resolve(); };
+                img.onerror = resolve;
+            };
+            reader.readAsDataURL(file);
         }));
         await Promise.all(promises);
     }
@@ -152,23 +154,27 @@ document.addEventListener('DOMContentLoaded', function() {
         mainApp.style.opacity = '0'; 
         mainApp.style.pointerEvents = 'none';
         
+        // --- THE ON-SCREEN FIX ---
+        // Places it directly in front of the user so the browser MUST draw it.
         template.style.display = 'block';
         template.style.position = 'absolute';
         template.style.top = '0';
-        template.style.left = '-9999px'; 
+        template.style.left = '0'; 
         template.style.width = '800px';
+        template.style.zIndex = '999999';
+        template.style.backgroundColor = '#ffffff';
         window.scrollTo(0, 0);
 
         try {
             btn.innerText = "Loading Photos...";
             await loadImagesInGrid('pdfAccessPhotosGrid', 'accessPhotos');
             await loadImagesInGrid('pdfMiscPhotosGrid', 'miscPhotos');
-            await new Promise(r => setTimeout(r, 800)); 
+            
+            // Allow 1 second for the visible overlay to render perfectly
+            await new Promise(r => setTimeout(r, 1000)); 
 
             const doc = new jsPDF('p', 'mm', 'a4');
-            
-            // --- PROFESSIONAL MARGIN SETUP ---
-            const margin = 10; // 10mm beautiful corporate border
+            const margin = 10; 
             const pdfPrintWidth = doc.internal.pageSize.getWidth() - (margin * 2); 
             
             let pages = Array.from(template.querySelectorAll('.pdf-page'));
@@ -183,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.innerText = `Rendering Page ${i+1}/${pages.length}...`;
                 
                 const canvas = await html2canvas(pages[i], {
-                    scale: 2, // HIGH QUALITY RESTORED
+                    scale: 2, 
                     useCORS: true,
                     allowTaint: true,
                     windowWidth: 800,
@@ -191,14 +197,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     backgroundColor: '#ffffff'
                 });
                 
-                const imgData = canvas.toDataURL('image/jpeg', 1.0); // MAX QUALITY JPEG
+                const imgData = canvas.toDataURL('image/jpeg', 1.0); 
                 const imgProps = doc.getImageProperties(imgData);
                 const ratio = imgProps.height / imgProps.width;
                 const pdfPrintHeight = pdfPrintWidth * ratio;
                 
                 if (i > 0) doc.addPage();
-                
-                // Print with margins (X, Y, Width, Height)
                 doc.addImage(imgData, 'JPEG', margin, margin, pdfPrintWidth, pdfPrintHeight);
                 
                 canvas.width = 0; 
@@ -216,6 +220,8 @@ document.addEventListener('DOMContentLoaded', function() {
             template.style.top = '';
             template.style.left = '';
             template.style.width = '';
+            template.style.zIndex = '';
+            template.style.backgroundColor = '';
             mainApp.style.opacity = originalOpacity || '1';
             mainApp.style.pointerEvents = originalPointerEvents || 'auto';
             btn.innerText = originalText;
@@ -226,7 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ==========================================
     // 4. BULLETPROOF DATA BINDING
     // ==========================================
-    // Uses optional chaining (?.) so empty fields NEVER crash the app
     function getSurveyData() {
         const dName = document.getElementById('designerSelect')?.value || "Surveyor";
         const dProfile = designerProfiles[dName] || { phone: "", email: "", bio: "We will be in touch shortly." };
@@ -286,9 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const imgTag = document.getElementById(`pdfImgInternal-${id}`);
                 if (fCanvas && imgTag) { fCanvas.renderAll(); imgTag.src = fCanvas.toDataURL({ format: 'jpeg', quality: 1.0 }); }
             });
-        } catch (e) {
-            console.warn("Minor binding issue, bypassing:", e);
-        }
+        } catch (e) { console.warn("Minor binding issue, bypassing:", e); }
 
         await executeSecurePDFGeneration('pdfTemplateInternal', `${data.clientName.replace(/\s+/g, '')}_Internal_Survey.pdf`, this);
     });
@@ -347,9 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const imgEl = document.getElementById('pdfImgCustomer-frontelevation');
                 if (imgEl) imgEl.src = frontCanvas.toDataURL({ format: 'jpeg', quality: 1.0 }); 
             }
-        } catch (e) {
-            console.warn("Minor binding issue, bypassing:", e);
-        }
+        } catch (e) { console.warn("Minor binding issue, bypassing:", e); }
 
         await executeSecurePDFGeneration('pdfTemplateCustomer', `${data.clientName.replace(/\s+/g, '')}_Consultation.pdf`, this);
     });
