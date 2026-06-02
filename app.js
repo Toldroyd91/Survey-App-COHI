@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("[Diagnostics] Blueprint Scroll Lock & Auto-Fit Engine Loaded.");
+    console.log("[Diagnostics] Blueprint Pinch-to-Zoom & Pan Engine Loaded.");
     const { jsPDF } = window.jspdf;
 
     // --- INTERACTIVE FABRIC VECTOR IMPLEMENTATION ---
@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const canvasEl = group.querySelector('canvas');
         if (!canvasEl) return;
 
-        // Initialize Fabric - Default as strictly LOCKED to allow safe web scrolling
         const fCanvas = new fabric.Canvas(canvasEl.id, { 
             isDrawingMode: false,
             allowTouchScrolling: true,
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.appCanvases[id] = fCanvas;
 
         // Vector State Flags
-        let activeTool = 'locked'; // Options: locked, freehand, line, text
+        let activeTool = 'locked'; 
         let isDrawingLine = false;
         let activeLineObj = null;
         let startX = 0; let startY = 0;
@@ -33,41 +32,129 @@ document.addEventListener('DOMContentLoaded', function() {
         const maximizeBtn = group.querySelector('.maximize-btn');
         const clearBtn = group.querySelector('.clear-btn');
         const fileInput = group.querySelector('.camera-input');
+        const canvasContainer = group.querySelector('.canvas-container');
+
+        // ==========================================
+        // CAMERA ENGINE: PINCH, ZOOM & PAN
+        // ==========================================
+        let isPinching = false;
+        let lastPinchDist = 0;
+        let isPanning = false;
+        let lastPanX = 0; 
+        let lastPanY = 0;
+
+        // 1. Desktop Trackpad / Mouse Wheel Zoom
+        fCanvas.on('mouse:wheel', function(opt) {
+            let delta = opt.e.deltaY;
+            let zoom = fCanvas.getZoom();
+            zoom *= 0.999 ** delta;
+            if (zoom > 10) zoom = 10;
+            if (zoom < 0.5) zoom = 0.5;
+            fCanvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+            opt.e.preventDefault();
+            opt.e.stopPropagation();
+        });
+
+        // 2. One-Finger Panning (Active ONLY when Canvas is Locked)
+        fCanvas.on('mouse:down', function(opt) {
+            if (activeTool === 'locked' && !isPinching) {
+                isPanning = true;
+                lastPanX = opt.e.clientX || (opt.e.touches && opt.e.touches[0].clientX);
+                lastPanY = opt.e.clientY || (opt.e.touches && opt.e.touches[0].clientY);
+            }
+        });
+
+        fCanvas.on('mouse:move', function(opt) {
+            if (isPanning && activeTool === 'locked') {
+                let e = opt.e;
+                let currentX = e.clientX || (e.touches && e.touches[0].clientX);
+                let currentY = e.clientY || (e.touches && e.touches[0].clientY);
+                if (currentX && currentY && lastPanX && lastPanY) {
+                    let vpt = fCanvas.viewportTransform;
+                    vpt[4] += currentX - lastPanX; // Move Camera X
+                    vpt[5] += currentY - lastPanY; // Move Camera Y
+                    fCanvas.requestRenderAll();
+                    lastPanX = currentX;
+                    lastPanY = currentY;
+                }
+            }
+        });
+
+        fCanvas.on('mouse:up', function() {
+            isPanning = false;
+            fCanvas.setViewportTransform(fCanvas.viewportTransform); // lock in coordinates
+        });
+
+        // 3. Multi-Touch Pinch to Zoom (Raw DOM Events for iOS/Android perfection)
+        canvasContainer.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                isPinching = true;
+                isPanning = false;
+                fCanvas.isDrawingMode = false; // Safety override to prevent stray lines while zooming
+                
+                lastPinchDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        }, { passive: false });
+
+        canvasContainer.addEventListener('touchmove', function(e) {
+            if (isPinching && e.touches.length === 2) {
+                e.preventDefault(); // Stop website scrolling completely
+                
+                let currentDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                
+                let zoom = fCanvas.getZoom();
+                zoom *= (currentDist / lastPinchDist); 
+                
+                if (zoom > 10) zoom = 10;
+                if (zoom < 0.5) zoom = 0.5;
+
+                // Zoom precisely into the center point between the two fingers
+                let rect = canvasContainer.getBoundingClientRect();
+                let pinchCenterX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+                let pinchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+
+                fCanvas.zoomToPoint({ x: pinchCenterX, y: pinchCenterY }, zoom);
+                lastPinchDist = currentDist;
+            }
+        }, { passive: false });
+
+        canvasContainer.addEventListener('touchend', function(e) {
+            if (isPinching && e.touches.length < 2) {
+                isPinching = false;
+                // Instantly return the pen tool if they were freehanding before the pinch
+                if (activeTool === 'freehand') fCanvas.isDrawingMode = true; 
+            }
+        });
+        // ==========================================
 
         function setButtonState(tool) {
             activeTool = tool;
             
-            // Highlight tracking updates
             lockBtn?.classList.toggle('canvas-locked', tool === 'locked');
-            if (lockBtn) {
-                lockBtn.textContent = (tool === 'locked') ? '🔒 Locked for Scroll' : '🔓 Canvas Active';
-            }
+            if (lockBtn) lockBtn.textContent = (tool === 'locked') ? '🔒 Locked for Scroll & Pan' : '🔓 Canvas Active';
             
             freehandBtn?.classList.toggle('active', tool === 'freehand');
             lineBtn?.classList.toggle('active', tool === 'line');
             textBtn?.classList.toggle('active', tool === 'text');
             
-            // Toggle core behavioral constraints
             fCanvas.isDrawingMode = (tool === 'freehand');
             fCanvas.selection = (tool === 'text' || tool === 'locked'); 
-            
-            // Critical Scroll Security Lock: If drawing or lines are active, cut device scrolling instantly
             fCanvas.allowTouchScrolling = (tool === 'locked' || tool === 'text');
 
-            // Force text objects to freeze solid when canvas is locked down
             fCanvas.getObjects().forEach(obj => {
                 obj.selectable = (tool === 'text');
                 obj.editable = (tool === 'text');
             });
 
             fCanvas.discardActiveObject();
-            fCanvas.off('mouse:down'); fCanvas.off('mouse:move'); fCanvas.off('mouse:up');
-
-            if (tool === 'line') {
-                bindLineTool();
-            } else if (tool === 'text') {
-                bindTextTool();
-            }
+            if (tool === 'line') bindLineTool();
+            else if (tool === 'text') bindTextTool();
             
             fCanvas.calcOffset();
             fCanvas.renderAll();
@@ -75,6 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Vector Straight Line Mechanics
         function bindLineTool() {
+            fCanvas.off('mouse:down'); fCanvas.off('mouse:move'); fCanvas.off('mouse:up');
             fCanvas.on('mouse:down', function(o) {
                 if (activeTool !== 'line') return;
                 isDrawingLine = true;
@@ -97,15 +185,14 @@ document.addEventListener('DOMContentLoaded', function() {
             fCanvas.on('mouse:up', function() {
                 if (activeTool !== 'line') return;
                 isDrawingLine = false;
-                if (activeLineObj) {
-                    activeLineObj.setCoords();
-                }
+                if (activeLineObj) activeLineObj.setCoords();
                 fCanvas.renderAll();
             });
         }
 
         // Vector Measurement Text Mechanics
         function bindTextTool() {
+            fCanvas.off('mouse:down'); fCanvas.off('mouse:move'); fCanvas.off('mouse:up');
             fCanvas.on('mouse:down', function(o) {
                 if (activeTool !== 'text') return;
                 const target = fCanvas.findTarget(o.e);
@@ -134,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             fCanvas.clear();
             fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
+            fCanvas.setViewportTransform([1,0,0,1,0,0]); // Snap Camera Home
             if (fileInput) fileInput.value = '';
             setButtonState('locked');
         });
@@ -142,13 +230,15 @@ document.addEventListener('DOMContentLoaded', function() {
         maximizeBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             const isFull = group.classList.toggle('fullscreen-mode');
+            
+            // Snap camera zoom back to 100% so users don't get lost in the transition
+            fCanvas.setViewportTransform([1,0,0,1,0,0]); 
+
             if (isFull) {
                 maximizeBtn.textContent = '📉 Close Screen';
                 fCanvas.setDimensions({ width: window.innerWidth - 40, height: window.innerHeight - 140 });
             } else {
                 maximizeBtn.textContent = '🔍 Max Screen';
-                
-                // If exiting full screen, calculate aspect ratio constraint again to retain shape
                 const currentBg = fCanvas.backgroundImage;
                 if (currentBg) {
                     const imgRatio = currentBg.height / currentBg.width;
@@ -166,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 100);
         });
 
-        // Photo Upload Injection Module (Auto-Fit Aspect Ratio to Prevent Cropping)
+        // Photo Upload Injection Module (Auto-Fit Aspect Ratio)
         if (fileInput) {
             fileInput.addEventListener('change', function(e) {
                 if (!e.target.files || e.target.files.length === 0) return;
@@ -175,17 +265,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = function(f) {
                     const nativeImg = new Image();
                     nativeImg.onload = function() {
-                        
-                        // 1. Calculate aspect ratio based on physical photo
                         const imgRatio = nativeImg.height / nativeImg.width;
-                        
-                        // 2. Set dynamic height based on the container width
                         const maxWidth = group.querySelector('.canvas-container').clientWidth || 600;
                         const dynamicHeight = maxWidth * imgRatio;
                         
-                        // 3. Resize Fabric workspace grid to encapsulate the entire image shape
                         fCanvas.setDimensions({ width: maxWidth, height: dynamicHeight });
-
                         const fabricImg = new fabric.Image(nativeImg);
                         const scale = Math.min(fCanvas.width / fabricImg.width, fCanvas.height / fabricImg.height);
                         
@@ -277,7 +361,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let pages = Array.from(template.querySelectorAll('.pdf-page')).filter(el => window.getComputedStyle(el).display !== 'none');
 
-            // 1. Convert HTML pages
             for(let i = 0; i < pages.length; i++) {
                 btn.innerText = `Printing Page ${i+1}/${pages.length}...`;
                 
@@ -293,7 +376,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 canvas.width = 0; canvas.height = 0; 
             }
 
-            // 2. Inject External JPEGs (Customer PDF Only)
             if (templateId === 'pdfTemplateCustomer') {
                 btn.innerText = "Attaching Pamphlets...";
                 const pdfFullWidth = doc.internal.pageSize.getWidth();
@@ -325,12 +407,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- BRUTE-FORCE DATA BINDING ---
+    // --- DATA BINDING ---
     function getSurveyData() {
         const dName = document.getElementById('designerSelect')?.value || "Surveyor";
         const selectedBrand = document.getElementById('brandSelect')?.value || "CO Home Improvements";
         
-        // Data extraction mapping from external window configuration (designers.js)
         const profiles = window.designerProfiles || {};
         const logos = window.brandLogos || {};
         const profile = profiles[dName] || { phone: "", email: "" };
@@ -383,6 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const fCanvas = window.appCanvases[id];
                 const imgTag = document.getElementById(`pdfImgInternal-${id}`);
                 if (fCanvas && imgTag) { 
+                    fCanvas.setViewportTransform([1,0,0,1,0,0]); // Re-center camera for clean PDF capture
                     fCanvas.discardActiveObject(); 
                     fCanvas.renderAll(); 
                     imgTag.src = fCanvas.toDataURL({ format: 'jpeg', quality: 0.9 }); 
@@ -390,7 +472,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } catch (e) { console.warn("Binding bypass:", e); }
 
-        await executeSecurePDFGeneration('pdfTemplateInternal', 'Internal_Survey.pdf', this, data);
+        const surname = data.clientName.trim().split(' ').pop() || 'Customer';
+        await executeSecurePDFGeneration('pdfTemplateInternal', `${surname}_Internal_Survey.pdf`, this, data);
     });
 
     document.getElementById('generateCustomerPdfBtn')?.addEventListener('click', async function() {
@@ -400,7 +483,6 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             await applySafeLogo(template, data.logoSource);
 
-            // --- INTRO LETTER CONVERSATIONAL GENERATOR ---
             const firstName = data.clientName.split(' ')[0] || 'Customer';
             const greetingEl = document.getElementById('lp-greeting');
             if (greetingEl) {
@@ -469,6 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (e) { console.warn("Binding bypass:", e); }
 
-        await executeSecurePDFGeneration('pdfTemplateCustomer', 'Design_Consultation.pdf', this, data);
+        const surname = data.clientName.trim().split(' ').pop() || 'Customer';
+        await executeSecurePDFGeneration('pdfTemplateCustomer', `${surname}_Design_Consultation.pdf`, this, data);
     });
 });
