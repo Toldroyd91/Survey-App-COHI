@@ -9,7 +9,7 @@
         .btn-danger { background: #8b0000; color: white; border: none; }
         .canvas-controls { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         
-        /* New Blueprint Tool Styling */
+        /* Blueprint Tool Styling */
         .tool-btn { 
             background: #2D2D2D; 
             color: #A0A0A0; 
@@ -33,6 +33,10 @@
             font-weight: bold; 
             box-shadow: 0 0 8px rgba(13,110,253,0.4);
         }
+        /* Lock Button Highlight States */
+        .tool-btn.lock-btn { background: #2b1d1d; border-color: #532222; color: #ff6b6b; }
+        .tool-btn.lock-btn.canvas-locked { background: #1c3222; border-color: #22532c; color: #6bff7e; font-weight: bold; }
+        
         .tool-btn:active { transform: scale(0.96); }
         
         /* Full Screen Blueprint Overlay Overlay */
@@ -89,7 +93,8 @@
                 <input type="file" class="camera-input form-group__input--touch" accept="image/*">
                 <div class="canvas-container"><canvas id="canvas-frontelevation" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
@@ -101,7 +106,8 @@
                 <input type="file" class="camera-input form-group__input--touch" accept="image/*">
                 <div class="canvas-container"><canvas id="canvas-sideelevation" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
@@ -113,7 +119,8 @@
                 <input type="file" class="camera-input form-group__input--touch" accept="image/*">
                 <div class="canvas-container"><canvas id="canvas-rearelevation" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
@@ -135,7 +142,8 @@
                 <input type="file" class="camera-input form-group__input" accept="image/*">
                 <div class="canvas-container"><canvas id="canvas-housematerialphoto" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
@@ -149,7 +157,8 @@
                 <input type="file" class="camera-input form-group__input" accept="image/*">
                 <div class="canvas-container"><canvas id="canvas-treelocations" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
@@ -163,7 +172,8 @@
                 <input type="file" class="camera-input form-group__input" accept="image/*">
                 <div class="canvas-container"><canvas id="canvas-manhole" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
@@ -177,7 +187,8 @@
                 <input type="file" class="camera-input form-group__input" accept="image/*">
                 <div class="canvas-container"><canvas id="canvas-weepvents" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
@@ -193,7 +204,8 @@
                 <input type="file" class="camera-input form-group__input" accept="image/*">
                 <div class="canvas-container"><canvas id="canvas-rwpsvp" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
@@ -228,7 +240,8 @@
                 <input type="file" class="camera-input form-group__input" accept="image/*">
                 <div class="canvas-container" style="background:#fff;"><canvas id="canvas-designersketch" width="600" height="400"></canvas></div>
                 <div class="canvas-controls">
-                    <button type="button" class="tool-btn freehand-btn active">✏️ Freehand</button>
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
