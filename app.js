@@ -1,247 +1,440 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("[Diagnostics] Engine Started. Loading modules...");
+    console.log("[Diagnostics] Blueprint Touch Calibration Engine Loaded.");
+    const { jsPDF } = window.jspdf;
 
-    const dateInput = document.getElementById('apptDate');
-    if(dateInput && !dateInput.value) {
-        dateInput.valueAsDate = new Date();
-    }
-
-    // ==========================================
-    // 1. DIGITAL DICTIONARIES
-    // ==========================================
     const designerProfiles = {
-        "Tom": { phone: "07700 900000", email: "tom@cohi.co.uk", defaultBrand: "Yorkshire Windows", bio: "Thank you for welcoming me into your home today. Over the next 48 hours, I will be passing these precise measurements to our architectural team to generate your 3D visual renders and structural quote." },
-        "Sarah": { phone: "07700 900001", email: "sarah@cohi.co.uk", defaultBrand: "CO Home Improvements", bio: "It was a pleasure meeting you to discuss your new living space. I am now compiling your technical requirements to generate a comprehensive, bespoke quotation and design mockup." },
-        "Mark": { phone: "07700 900002", email: "mark@cohi.co.uk", defaultBrand: "CO Home Improvements", bio: "Thank you for your time today. I am personally overseeing the initial design phase of your project. We will have your custom 3D concepts and pricing structure ready for review shortly." }
+        "Tom": { phone: "07700 900000", email: "tom@cohi.co.uk", defaultBrand: "Yorkshire Windows" },
+        "Sobaan": { phone: "07700 900001", email: "sobaan@cohi.co.uk", defaultBrand: "CO Home Improvements" },
+        "James": { phone: "07700 900002", email: "james@cohi.co.uk", defaultBrand: "CO Home Improvements" }
     };
 
-    // YOUR CUSTOM BRAND LOGOS
     const brandLogos = {
-        "Clearview": "clearview.png",
-        "CO Home Improvements": "logo.jpg",
-        "Orion Windows": "orion.png",
-        "Planet Windows": "planet.png",
-        "Trent Valley Windows": "trentvalley.png",
-        "West Yorkshire Windows": "westyorkshire.png",
+        "Clearview": "clearview.png", "CO Home Improvements": "logo.jpg", "Orion Windows": "orion.png",
+        "Planet": "planet.png", "Trent Valley Windows": "trentvalley.png", "West Yorkshire Windows": "westyorkshire.png",
         "Yorkshire Windows": "yorkshire.png"
     };
 
-    const designerSelect = document.getElementById('designerSelect');
-    const brandSelect = document.getElementById('brandSelect');
-    if(designerSelect && brandSelect) {
-        designerSelect.addEventListener('change', (e) => {
-            const name = e.target.value;
-            if(designerProfiles[name]) brandSelect.value = designerProfiles[name].defaultBrand;
-        });
-    }
-
-    // ==========================================
-    // 2. AUTO-SAVE ENGINE
-    // ==========================================
-    const inputsToSave = document.querySelectorAll('input:not([type="file"]), textarea, select');
-    const savedData = JSON.parse(localStorage.getItem('surveyAppData')) || {};
-    
-    inputsToSave.forEach(input => {
-        if (savedData[input.id]) input.value = savedData[input.id];
-        input.addEventListener('input', () => {
-            savedData[input.id] = input.value;
-            localStorage.setItem('surveyAppData', JSON.stringify(savedData));
-        });
-    });
-
-    const resetBtn = document.getElementById('resetFormBtn');
-    if(resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            if(confirm("Are you sure? This will wipe all data for the next appointment.")) {
-                localStorage.removeItem('surveyAppData');
-                inputsToSave.forEach(input => input.value = '');
-                if(dateInput) dateInput.valueAsDate = new Date(); 
-                Object.values(window.appCanvases).forEach(fCanvas => {
-                    fCanvas.getObjects().forEach(obj => fCanvas.remove(obj));
-                    fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
-                });
-                window.scrollTo(0, 0);
-            }
-        });
-    }
-
-    // ==========================================
-    // 3. MULTI-CANVAS ENGINE
-    // ==========================================
+    // --- INTERACTIVE FABRIC VECTOR IMPLEMENTATION ---
     window.appCanvases = {};
     document.querySelectorAll('.canvas-group').forEach(group => {
         const id = group.getAttribute('data-id');
         const canvasEl = group.querySelector('canvas');
-        const fileInput = group.querySelector('.camera-input');
-        const clearBtn = group.querySelector('.clear-btn');
-        if (!canvasEl) return; 
+        if (!canvasEl) return;
 
-        const fCanvas = new fabric.Canvas(canvasEl.id, { isDrawingMode: true });
+        // Initialize Fabric with touch support optimized
+        const fCanvas = new fabric.Canvas(canvasEl.id, { 
+            isDrawingMode: true,
+            allowTouchScrolling: true
+        });
         fCanvas.freeDrawingBrush.color = '#FF0000';
         fCanvas.freeDrawingBrush.width = 4;
         window.appCanvases[id] = fCanvas;
 
-        fileInput.addEventListener('change', function(e) {
-            if (!e.target.files || e.target.files.length === 0) return;
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(f) {
-                const nativeImg = new Image();
-                nativeImg.onload = function() {
-                    const fabricImg = new fabric.Image(nativeImg);
-                    const scale = Math.min(fCanvas.width / fabricImg.width, fCanvas.height / fabricImg.height);
-                    fabricImg.set({ originX: 'center', originY: 'center', scaleX: scale, scaleY: scale, left: fCanvas.width / 2, top: fCanvas.height / 2 });
-                    fCanvas.setBackgroundImage(fabricImg, fCanvas.renderAll.bind(fCanvas));
-                };
-                nativeImg.src = f.target.result;
-            };
-            reader.readAsDataURL(file);
+        // Vector State Flags
+        let activeTool = 'freehand'; 
+        let isDrawingLine = false;
+        let activeLineObj = null;
+        let startX = 0; let startY = 0;
+
+        // DOM Toolbar Mapping
+        const freehandBtn = group.querySelector('.freehand-btn');
+        const lineBtn = group.querySelector('.line-btn');
+        const textBtn = group.querySelector('.text-btn');
+        const maximizeBtn = group.querySelector('.maximize-btn');
+        const clearBtn = group.querySelector('.clear-btn');
+        const fileInput = group.querySelector('.camera-input');
+
+        function setButtonState(tool) {
+            activeTool = tool;
+            freehandBtn?.classList.toggle('active', tool === 'freehand');
+            lineBtn?.classList.toggle('active', tool === 'line');
+            textBtn?.classList.toggle('active', tool === 'text');
+            
+            fCanvas.isDrawingMode = (tool === 'freehand');
+            fCanvas.selection = (tool === 'text'); 
+            fCanvas.allowTouchScrolling = (tool !== 'freehand' && tool !== 'line');
+
+            fCanvas.discardActiveObject();
+            
+            fCanvas.off('mouse:down'); 
+            fCanvas.off('mouse:move'); 
+            fCanvas.off('mouse:up');
+
+            if (tool === 'line') {
+                bindLineTool();
+            } else if (tool === 'text') {
+                bindTextTool();
+            }
+            
+            fCanvas.calcOffset();
+            fCanvas.renderAll();
+        }
+
+        // Vector Straight Line Mechanics
+        function bindLineTool() {
+            fCanvas.on('mouse:down', function(o) {
+                if (activeTool !== 'line') return;
+                isDrawingLine = true;
+                const pointer = fCanvas.getPointer(o.e);
+                startX = pointer.x; startY = pointer.y;
+                
+                activeLineObj = new fabric.Line([startX, startY, startX, startY], {
+                    strokeWidth: 4, stroke: '#FF0000', originX: 'center', originY: 'center', selectable: false, hasControls: false
+                });
+                fCanvas.add(activeLineObj);
+            });
+
+            fCanvas.on('mouse:move', function(o) {
+                if (!isDrawingLine || activeTool !== 'line') return;
+                const pointer = fCanvas.getPointer(o.e);
+                activeLineObj.set({ x2: pointer.x, y2: pointer.y });
+                fCanvas.renderAll();
+            });
+
+            fCanvas.on('mouse:up', function() {
+                if (activeTool !== 'line') return;
+                isDrawingLine = false;
+                if (activeLineObj) {
+                    activeLineObj.setCoords();
+                    activeLineObj.selectable = true;
+                }
+                fCanvas.renderAll();
+            });
+        }
+
+        // Vector Measurement Text Mechanics
+        function bindTextTool() {
+            fCanvas.on('mouse:down', function(o) {
+                if (activeTool !== 'text') return;
+                const target = fCanvas.findTarget(o.e);
+                if (target && (target.type === 'i-text' || target.type === 'text')) return;
+
+                const pointer = fCanvas.getPointer(o.e);
+                const mmText = new fabric.IText('3000 mm', {
+                    left: pointer.x, top: pointer.y, fontFamily: 'system-ui', fontSize: 20,
+                    fill: '#FFFF00', fontWeight: 'bold', backgroundColor: 'rgba(0,0,0,0.65)',
+                    padding: 6, cornerSize: 8, transparentCorners: false, hasControls: true
+                });
+                fCanvas.add(mmText);
+                fCanvas.setActiveObject(mmText);
+                fCanvas.renderAll();
+            });
+        }
+
+        // Hook Tool Switch UI Elements
+        freehandBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('freehand'); });
+        lineBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('line'); });
+        textBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('text'); });
+
+        // Reset Operations
+        clearBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            fCanvas.clear();
+            fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
+            if (fileInput) fileInput.value = '';
+            setButtonState('freehand');
         });
 
-        if (clearBtn) {
-            clearBtn.addEventListener('click', () => {
-                fCanvas.getObjects().forEach(obj => fCanvas.remove(obj));
-                fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
+        // 100% Screen Interface Overlay Toggler
+        maximizeBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isFull = group.classList.toggle('fullscreen-mode');
+            if (isFull) {
+                maximizeBtn.textContent = '📉 Close Screen';
+                fCanvas.setDimensions({ width: window.innerWidth - 40, height: window.innerHeight - 140 });
+            } else {
+                maximizeBtn.textContent = '🔍 Max Screen';
+                fCanvas.setDimensions({ width: 600, height: 400 });
+            }
+            
+            setTimeout(() => {
+                fCanvas.calcOffset();
+                fCanvas.renderAll();
+            }, 100);
+        });
+
+        // Photo Upload Injection Module
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                if (!e.target.files || e.target.files.length === 0) return;
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(f) {
+                    const nativeImg = new Image();
+                    nativeImg.onload = function() {
+                        const fabricImg = new fabric.Image(nativeImg);
+                        const scale = Math.min(fCanvas.width / fabricImg.width, fCanvas.height / fabricImg.height);
+                        fabricImg.set({ 
+                            originX: 'center', originY: 'center', scaleX: scale, scaleY: scale, 
+                            left: fCanvas.width / 2, top: fCanvas.height / 2, selectable: false
+                        });
+                        fCanvas.setBackgroundImage(fabricImg, () => {
+                            fCanvas.calcOffset();
+                            fCanvas.renderAll();
+                        });
+                    };
+                    nativeImg.src = f.target.result;
+                };
+                reader.readAsDataURL(file);
             });
         }
     });
 
-    // ==========================================
-    // 4. PDF GENERATION
-    // ==========================================
-    function getSurveyData() {
-        const dName = document.getElementById('designerSelect').value || "Surveyor";
-        const dProfile = designerProfiles[dName] || { phone: "", email: "", bio: "We will be in touch shortly with your quote." };
-        const selectedBrand = document.getElementById('brandSelect').value;
-        const logoFile = brandLogos[selectedBrand] || "logo.jpg";
+    // --- SECURE LOGO CONVERTER ---
+    async function applySafeLogo(template, logoUrl) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function() {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    const b64 = canvas.toDataURL('image/png');
+                    template.querySelectorAll('.brand-logo-img').forEach(el => {
+                        el.src = b64; el.style.display = 'inline-block';
+                    });
+                    resolve();
+                } catch(e) {
+                    template.querySelectorAll('.brand-logo-img').forEach(el => el.style.display = 'none');
+                    resolve();
+                }
+            };
+            img.onerror = function() {
+                template.querySelectorAll('.brand-logo-img').forEach(el => el.style.display = 'none');
+                resolve();
+            };
+            img.src = logoUrl;
+        });
+    }
 
+    // --- JPEG PAMPHLET INJECTOR ---
+    async function loadPamphletImage(url) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width; canvas.height = img.height;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                resolve(canvas.toDataURL('image/jpeg', 0.9));
+            };
+            img.onerror = () => resolve(null);
+            img.src = url;
+        });
+    }
+
+    // --- PDF GENERATOR ENGINE ---
+    async function executeSecurePDFGeneration(templateId, fileName, btn, data) {
+        btn.disabled = true;
+        const originalText = btn.innerText;
+        btn.innerText = "Processing...";
+
+        const template = document.getElementById(templateId);
+        const mainApp = document.querySelector('main') || document.body.firstElementChild;
+        
+        template.style.display = 'block';
+        template.style.position = 'absolute';
+        template.style.top = '0'; template.style.left = '0'; template.style.width = '800px';
+        template.style.zIndex = '999999'; template.style.backgroundColor = '#ffffff';
+        mainApp.style.display = 'none';
+        window.scrollTo(0, 0);
+
+        try {
+            await new Promise(r => setTimeout(r, 800)); 
+
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const margin = 10;
+            const pdfPrintWidth = doc.internal.pageSize.getWidth() - (margin * 2);
+            
+            let pages = Array.from(template.querySelectorAll('.pdf-page')).filter(el => window.getComputedStyle(el).display !== 'none');
+
+            // 1. Convert HTML pages
+            for(let i = 0; i < pages.length; i++) {
+                btn.innerText = `Printing Page ${i+1}/${pages.length}...`;
+                
+                const canvas = await html2canvas(pages[i], {
+                    scale: 1.5, useCORS: true, allowTaint: false, windowWidth: 800, logging: false, backgroundColor: '#ffffff'
+                });
+                
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const ratio = canvas.height / canvas.width;
+                
+                if (i > 0) doc.addPage();
+                doc.addImage(imgData, 'JPEG', margin, margin, pdfPrintWidth, pdfPrintWidth * ratio);
+                canvas.width = 0; canvas.height = 0; 
+            }
+
+            // 2. Inject External JPEGs (Customer PDF Only)
+            if (templateId === 'pdfTemplateCustomer') {
+                btn.innerText = "Attaching Pamphlets...";
+                const pdfFullWidth = doc.internal.pageSize.getWidth();
+                const pdfFullHeight = doc.internal.pageSize.getHeight();
+
+                if (data.sapCalcs === 'Yes') {
+                    const sapImg = await loadPamphletImage('sap-pamphlet.jpg');
+                    if (sapImg) { doc.addPage(); doc.addImage(sapImg, 'JPEG', 0, 0, pdfFullWidth, pdfFullHeight); }
+                }
+
+                if (data.planningPerms === 'Full Planning' || data.planningPerms === 'Pre Approved Planning') {
+                    const planningImg = await loadPamphletImage('planning-pamphlet.jpg');
+                    if (planningImg) { doc.addPage(); doc.addImage(planningImg, 'JPEG', 0, 0, pdfFullWidth, pdfFullHeight); }
+                }
+
+                if (data.buildType === 'Extension' && data.weepVents === 'Yes') {
+                    const cavityImg = await loadPamphletImage('cavity-pamphlet.jpg');
+                    if (cavityImg) { doc.addPage(); doc.addImage(cavityImg, 'JPEG', 0, 0, pdfFullWidth, pdfFullHeight); }
+                }
+            }
+
+            doc.save(fileName);
+        } catch (error) {
+            console.error("CAPTURE FAILED:", error);
+            alert("Capture Failed: " + error.message);
+        } finally {
+            template.style.display = 'none'; template.style.position = ''; mainApp.style.display = 'block';
+            btn.innerText = originalText; btn.disabled = false;
+        }
+    }
+
+    // --- BRUTE-FORCE DATA BINDING ---
+    function getSurveyData() {
+        const dName = document.getElementById('designerSelect')?.value || "Surveyor";
+        const selectedBrand = document.getElementById('brandSelect')?.value || "CO Home Improvements";
+        const profile = designerProfiles[dName] || { phone: "", email: "" };
+        
         return {
-            clientName: document.getElementById('clientName').value || 'Customer',
-            clientNum: document.getElementById('clientNum').value || '',
-            address: document.getElementById('postCode').value || '',
-            date: document.getElementById('apptDate').value ? new Date(document.getElementById('apptDate').value).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
-            buildType: document.getElementById('buildType').value || '',
-            roofType: document.getElementById('roofType').value || '',
-            proposedSize: document.getElementById('proposedSize').value || '',
-            frameColour: document.getElementById('frameColour').value || '',
-            houseMaterial: document.getElementById('houseMaterial').value || '',
-            dpcDepth: document.getElementById('dpcDepth').value || '',
-            fasciaHeight: document.getElementById('fasciaHeight').value || '',
-            airBricks: document.getElementById('airbricks').value || '',
-            buildingRegs: document.getElementById('buildingRegs').value || '',
-            planningPerms: document.getElementById('planningPerms').value || '',
-            sapCalcs: document.getElementById('sapCalcs').value || '',
-            budget: document.getElementById('budget').value || '',
-            accessDifficult: document.getElementById('accessDifficult').value || '',
-            accessWidth: document.getElementById('accessWidth').value || '',
-            wallObstacles: document.getElementById('wallObstacles').value || '',
-            designerNotes: document.getElementById('designerNotes').value || '',
-            miscNotes: document.getElementById('miscNotes').value || '',
-            designerName: dName, designerPhone: dProfile.phone, designerEmail: dProfile.email, designerBio: dProfile.bio, logoSource: logoFile
+            clientName: document.getElementById('clientName')?.value || 'Customer',
+            clientNum: document.getElementById('clientNum')?.value || '',
+            address: document.getElementById('postCode')?.value || '',
+            date: document.getElementById('apptDate')?.value ? new Date(document.getElementById('apptDate').value).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+            revisitDate: document.getElementById('revisitDate')?.value ? new Date(document.getElementById('revisitDate').value).toLocaleDateString('en-GB') : '',
+            revisitLocation: document.getElementById('revisitLocation')?.value || '',
+            buildType: document.getElementById('buildType')?.value || '',
+            roofType: document.getElementById('roofType')?.value || '',
+            proposedSize: document.getElementById('proposedSize')?.value || '',
+            frameColour: document.getElementById('frameColour')?.value || '',
+            newBuildMaterial: document.getElementById('newBuildMaterial')?.value || '',
+            planningPerms: document.getElementById('planningPerms')?.value || '',
+            buildingRegs: document.getElementById('buildingRegs')?.value || '',
+            sapCalcs: document.getElementById('sapCalcs')?.value || '',
+            weepVents: document.getElementById('weepventsExist')?.value || '',
+            designerName: dName, designerPhone: profile.phone, designerEmail: profile.email,
+            logoSource: brandLogos[selectedBrand] || "logo.jpg"
         };
     }
 
-    const generateInternalBtn = document.getElementById('generateInternalPdfBtn');
-    if (generateInternalBtn) {
-        generateInternalBtn.addEventListener('click', function() {
-            const data = getSurveyData();
-            const fileName = `${data.clientName.replace(/\s+/g, '')}_Internal_Survey.pdf`;
+    document.getElementById('generateInternalPdfBtn')?.addEventListener('click', async function() {
+        const data = getSurveyData();
+        const template = document.getElementById('pdfTemplateInternal');
+        
+        try {
+            await applySafeLogo(template, data.logoSource);
 
-            document.querySelectorAll('#pdfTemplateInternal .brand-logo-img').forEach(img => img.src = data.logoSource);
-            const mapsLink = document.getElementById('googleMapsLink');
-            if(data.address) { mapsLink.href = `http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(data.address)}`; mapsLink.style.display = "inline"; } 
-            else { mapsLink.style.display = "none"; }
-
-            const template = document.getElementById('pdfTemplateInternal');
             template.querySelectorAll('.bind-name').forEach(el => el.innerText = data.clientName);
             template.querySelectorAll('.bind-num').forEach(el => el.innerText = data.clientNum);
             template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
             template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
-            document.getElementById('pdfPrintDesigner').innerText = data.designerName;
             
-            document.getElementById('pdfBuildType').innerText = data.buildType;
-            document.getElementById('pdfRoofType').innerText = data.roofType;
-            document.getElementById('pdfProposedSize').innerText = data.proposedSize;
-            document.getElementById('pdfFrameColour').innerText = data.frameColour;
-            document.getElementById('pdfHouseMaterial').innerText = data.houseMaterial;
-            document.getElementById('pdfDpcDepth').innerText = data.dpcDepth;
-            document.getElementById('pdfFasciaHeight').innerText = data.fasciaHeight;
-            document.getElementById('pdfAirBricks').innerText = data.airBricks;
-            document.getElementById('pdfBuildingRegs').innerText = data.buildingRegs;
-            document.getElementById('pdfPlanningPerms').innerText = data.planningPerms;
-            document.getElementById('pdfSapCalcs').innerText = data.sapCalcs;
-            document.getElementById('pdfBudget').innerText = data.budget;
-            document.getElementById('pdfAccessDifficult').innerText = data.accessDifficult;
-            document.getElementById('pdfAccessWidth').innerText = data.accessWidth;
-            document.getElementById('pdfWallObstacles').innerText = data.wallObstacles;
-            document.getElementById('pdfDesignerNotes').innerText = data.designerNotes;
-            document.getElementById('pdfMiscNotes').innerText = data.miscNotes;
-
-            // HIGH-RES PNG UPGRADE FOR ALL CANVASES
-            ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'miscphotos', 'designersketch'].forEach(id => {
+            const designerEl = document.getElementById('pdfPrintDesigner');
+            if (designerEl) designerEl.innerText = data.designerName;
+            
+            ['BuildType', 'RoofType', 'ProposedSize', 'FrameColour', 'HouseMaterial', 'DpcDepth', 'FasciaHeight', 'AirBricks', 'BuildingRegs', 'PlanningPerms', 'SapCalcs', 'Budget', 'AccessDifficult', 'AccessWidth', 'WallObstacles', 'DesignerNotes', 'MiscNotes'].forEach(key => {
+                const inputEl = document.getElementById(key.charAt(0).toLowerCase() + key.slice(1));
+                const textEl = document.getElementById(`pdf${key}`);
+                if (inputEl && textEl) textEl.innerText = inputEl.value;
+            });
+            
+            ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
                 const fCanvas = window.appCanvases[id];
                 const imgTag = document.getElementById(`pdfImgInternal-${id}`);
                 if (fCanvas && imgTag) { 
+                    fCanvas.discardActiveObject(); 
                     fCanvas.renderAll(); 
-                    imgTag.src = fCanvas.toDataURL({ format: 'png' }); 
+                    imgTag.src = fCanvas.toDataURL({ format: 'jpeg', quality: 0.9 }); 
                 }
             });
+        } catch (e) { console.warn("Binding bypass:", e); }
 
-            const mainApp = document.querySelector('main');
-            window.scrollTo(0, 0);
-            mainApp.style.display = 'none';
-            template.style.display = 'block';
-            
-            // HIGH-RES 4K PDF CONFIGURATION
-            html2pdf().set({ 
-                filename: fileName, 
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 4, useCORS: true, letterRendering: true, scrollY: 0 }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-            }).from(template).save().then(() => {
-                template.style.display = 'none';
-                mainApp.style.display = 'block';
-            });
-        });
-    }
+        await executeSecurePDFGeneration('pdfTemplateInternal', 'Internal_Survey.pdf', this, data);
+    });
 
-    const generateCustomerBtn = document.getElementById('generateCustomerPdfBtn');
-    if (generateCustomerBtn) {
-        generateCustomerBtn.addEventListener('click', function() {
-            const data = getSurveyData();
-            const fileName = `${data.clientName.replace(/\s+/g, '')}_Design_Consultation.pdf`;
-            const template = document.getElementById('pdfTemplateCustomer');
-            
-            template.querySelectorAll('.brand-logo-img').forEach(img => img.src = data.logoSource);
-            document.getElementById('pdfDesignerBio').innerText = data.designerBio;
-            document.getElementById('pdfDesignerName').innerText = data.designerName;
-            document.getElementById('pdfDesignerContact').innerText = `${data.designerPhone} | ${data.designerEmail}`;
-            template.querySelectorAll('.bind-name').forEach(el => el.innerText = data.clientName);
-            template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
-            template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
+    document.getElementById('generateCustomerPdfBtn')?.addEventListener('click', async function() {
+        const data = getSurveyData();
+        const template = document.getElementById('pdfTemplateCustomer');
+        
+        try {
+            await applySafeLogo(template, data.logoSource);
 
-            // HIGH-RES PNG UPGRADE FOR COVER PHOTO
-            const frontCanvas = window.appCanvases['frontelevation'];
-            if (frontCanvas) { 
-                frontCanvas.renderAll(); 
-                document.getElementById('pdfImgCustomer-frontelevation').src = frontCanvas.toDataURL({ format: 'png' }); 
+            // --- INTRO LETTER CONVERSATIONAL GENERATOR ---
+            const firstName = data.clientName.split(' ')[0] || 'Customer';
+            const greetingEl = document.getElementById('lp-greeting');
+            if (greetingEl) {
+                greetingEl.innerHTML = `Hi ${firstName},<br><br>I want to say a massive thank you for inviting me into your home today. I've put together this summary document outlining the major talking points from our appointment so we both know we are on exactly the right lines. If there is anything you'd like to adjust, please don't hesitate to get in touch.`;
             }
 
-            const mainApp = document.querySelector('main');
-            window.scrollTo(0, 0);
-            mainApp.style.display = 'none';
-            template.style.display = 'block';
+            const sizeEl = document.getElementById('lp-size');
+            if (sizeEl) {
+                if (data.buildType && data.proposedSize) {
+                    sizeEl.innerText = `As discussed, we are proposing a beautiful new ${data.buildType} measuring approximately ${data.proposedSize}mm. We have plenty of flexibility to adjust this as we develop the final design.`;
+                } else if (data.buildType) {
+                    sizeEl.innerText = `As discussed, we are proposing a beautiful new ${data.buildType}. We didn't quite pinpoint the exact dimensions just yet, which is absolutely fine. We have plenty of flexibility to work towards the perfect size as we develop the design.`;
+                } else {
+                    sizeEl.innerText = `We didn't quite pinpoint the exact dimensions of your build just yet, which is absolutely fine. We have plenty of flexibility to work towards the perfect size as we develop the design.`;
+                }
+            }
+
+            const roofEl = document.getElementById('lp-roof');
+            if (roofEl) {
+                if (data.roofType) {
+                    roofEl.innerText = `To perfectly complement the build, we discussed incorporating a premium ${data.roofType} system. I will prepare a few different 3D options featuring this so you can see exactly how it looks.`;
+                } else {
+                    roofEl.innerText = `We have yet to decide on the final roof style, but I will prepare a few different options for you to review so we can find the perfect match for your home.`;
+                }
+            }
+
+            const frameEl = document.getElementById('lp-frame');
+            if (frameEl) {
+                if (data.frameColour) {
+                    frameEl.innerText = `We agreed that the window and door frames will look fantastic finished in an elegant ${data.frameColour} colourway to match your property.`;
+                } else {
+                    frameEl.innerText = `We haven't narrowed down the final frame colour or build materials just yet, but we have an incredible range to choose from. Just let me know when you are ready to explore them.`;
+                }
+            }
+
+            const complianceEl = document.getElementById('lp-compliance');
+            if (complianceEl) {
+                const needsPlanning = (data.planningPerms === 'Full Planning' || data.planningPerms === 'Pre Approved Planning');
+                const needsRegs = (data.buildingRegs === 'Yes');
+                const needsSap = (data.sapCalcs === 'Yes');
+
+                if (!needsPlanning && !needsRegs && !needsSap) {
+                    complianceEl.innerText = `Based on your choices, it looks like we do not need Planning Permission, we do not need Building Regulations, and we do not need SAP calculations. Please don't worry about the technicalities of these—I have included a brief explanation of what they mean later in this pack, and our team will handle all of it for you.`;
+                } else {
+                    let reqs = [];
+                    if (needsPlanning) reqs.push(data.planningPerms);
+                    if (needsRegs) reqs.push("Building Regulations");
+                    if (needsSap) reqs.push("SAP Calculations");
+                    
+                    const reqString = reqs.join(', ').replace(/, ([^,]*)$/, ' and $1');
+                    complianceEl.innerText = `Regarding compliance, based on our discussion your project will require ${reqString}. Please don't worry about the technicalities of these—I have included a brief explanation of what they mean later in this pack, and our dedicated team will handle all of it for you.`;
+                }
+            }
+
+            const revisitEl = document.getElementById('lp-revisit');
+            if (revisitEl) {
+                if (data.revisitDate) {
+                    revisitEl.innerText = `I look forward to our next catch-up scheduled for ${data.revisitDate}${data.revisitLocation ? ` at ${data.revisitLocation}` : ''}. We will go through your custom 3D designs together then. If you need anything before I next get in touch, please contact me on the details below.`;
+                } else {
+                    revisitEl.innerText = `We haven't booked in a date for our next catch-up just yet, but as soon as we work out a time, we will get you scheduled in. If you need anything before I next get in touch, please contact me on the details below.`;
+                }
+            }
             
-            // HIGH-RES 4K PDF CONFIGURATION
-            html2pdf().set({ 
-                filename: fileName, 
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 4, useCORS: true, letterRendering: true, scrollY: 0 }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-            }).from(template).save().then(() => {
-                template.style.display = 'none';
-                mainApp.style.display = 'block';
-            });
-        });
-    }
+            const nameEl = document.getElementById('lp-designer-name'); if(nameEl) nameEl.innerText = data.designerName;
+            const contactEl = document.getElementById('lp-designer-contact'); if(contactEl) contactEl.innerText = `${data.designerPhone} | ${data.designerEmail}`;
+            
+        } catch (e) { console.warn("Binding bypass:", e); }
+
+        await executeSecurePDFGeneration('pdfTemplateCustomer', 'Design_Consultation.pdf', this, data);
+    });
 });
