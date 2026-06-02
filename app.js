@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("[Diagnostics] Blueprint Touch Calibration Engine Loaded.");
+    console.log("[Diagnostics] Blueprint Scroll Lock Engine Loaded.");
     const { jsPDF } = window.jspdf;
 
     const designerProfiles = {
-        "Thomas Oldroyd": { phone: "07949800336", email: "thomasoldroyd@yorkshirewindows.com", defaultBrand: "Yorkshire Windows" },
+        "Tom": { phone: "07700 900000", email: "tom@cohi.co.uk", defaultBrand: "Yorkshire Windows" },
         "Sobaan": { phone: "07700 900001", email: "sobaan@cohi.co.uk", defaultBrand: "CO Home Improvements" },
         "James": { phone: "07700 900002", email: "james@cohi.co.uk", defaultBrand: "CO Home Improvements" }
     };
@@ -21,22 +21,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const canvasEl = group.querySelector('canvas');
         if (!canvasEl) return;
 
-        // Initialize Fabric with touch support optimized
+        // Initialize Fabric - Default as strictly LOCKED to allow safe web scrolling
         const fCanvas = new fabric.Canvas(canvasEl.id, { 
-            isDrawingMode: true,
-            allowTouchScrolling: true
+            isDrawingMode: false,
+            allowTouchScrolling: true,
+            selection: false
         });
         fCanvas.freeDrawingBrush.color = '#FF0000';
         fCanvas.freeDrawingBrush.width = 4;
         window.appCanvases[id] = fCanvas;
 
         // Vector State Flags
-        let activeTool = 'freehand'; 
+        let activeTool = 'locked'; // Options: locked, freehand, line, text
         let isDrawingLine = false;
         let activeLineObj = null;
         let startX = 0; let startY = 0;
 
         // DOM Toolbar Mapping
+        const lockBtn = group.querySelector('.lock-btn');
         const freehandBtn = group.querySelector('.freehand-btn');
         const lineBtn = group.querySelector('.line-btn');
         const textBtn = group.querySelector('.text-btn');
@@ -46,19 +48,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function setButtonState(tool) {
             activeTool = tool;
+            
+            // Highlight tracking updates
+            lockBtn?.classList.toggle('canvas-locked', tool === 'locked');
+            if (lockBtn) {
+                lockBtn.textContent = (tool === 'locked') ? '🔒 Locked for Scroll' : '🔓 Canvas Active';
+            }
+            
             freehandBtn?.classList.toggle('active', tool === 'freehand');
             lineBtn?.classList.toggle('active', tool === 'line');
             textBtn?.classList.toggle('active', tool === 'text');
             
+            // Toggle core behavioral constraints
             fCanvas.isDrawingMode = (tool === 'freehand');
-            fCanvas.selection = (tool === 'text'); 
-            fCanvas.allowTouchScrolling = (tool !== 'freehand' && tool !== 'line');
+            fCanvas.selection = (tool === 'text' || tool === 'locked'); 
+            
+            // Critical Scroll Security Lock: If drawing or lines are active, cut device scrolling instantly
+            fCanvas.allowTouchScrolling = (tool === 'locked' || tool === 'text');
+
+            // Force text objects to freeze solid when canvas is locked down
+            fCanvas.getObjects().forEach(obj => {
+                obj.selectable = (tool === 'text');
+                obj.editable = (tool === 'text');
+            });
 
             fCanvas.discardActiveObject();
-            
-            fCanvas.off('mouse:down'); 
-            fCanvas.off('mouse:move'); 
-            fCanvas.off('mouse:up');
+            fCanvas.off('mouse:down'); fCanvas.off('mouse:move'); fCanvas.off('mouse:up');
 
             if (tool === 'line') {
                 bindLineTool();
@@ -96,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 isDrawingLine = false;
                 if (activeLineObj) {
                     activeLineObj.setCoords();
-                    activeLineObj.selectable = true;
                 }
                 fCanvas.renderAll();
             });
@@ -121,7 +135,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Hook Tool Switch UI Elements
+        // Hook UI Interactive Elements
+        lockBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('locked'); });
         freehandBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('freehand'); });
         lineBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('line'); });
         textBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('text'); });
@@ -132,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fCanvas.clear();
             fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
             if (fileInput) fileInput.value = '';
-            setButtonState('freehand');
+            setButtonState('locked');
         });
 
         // 100% Screen Interface Overlay Toggler
