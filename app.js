@@ -1,18 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("[Diagnostics] Blueprint Scroll Lock Engine Loaded.");
+    console.log("[Diagnostics] Blueprint Scroll Lock & Auto-Fit Engine Loaded.");
     const { jsPDF } = window.jspdf;
-
-    const designerProfiles = {
-        "Tom": { phone: "07700 900000", email: "tom@cohi.co.uk", defaultBrand: "Yorkshire Windows" },
-        "Sobaan": { phone: "07700 900001", email: "sobaan@cohi.co.uk", defaultBrand: "CO Home Improvements" },
-        "James": { phone: "07700 900002", email: "james@cohi.co.uk", defaultBrand: "CO Home Improvements" }
-    };
-
-    const brandLogos = {
-        "Clearview": "clearview.png", "CO Home Improvements": "logo.jpg", "Orion Windows": "orion.png",
-        "Planet": "planet.png", "Trent Valley Windows": "trentvalley.png", "West Yorkshire Windows": "westyorkshire.png",
-        "Yorkshire Windows": "yorkshire.png"
-    };
 
     // --- INTERACTIVE FABRIC VECTOR IMPLEMENTATION ---
     window.appCanvases = {};
@@ -159,7 +147,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 fCanvas.setDimensions({ width: window.innerWidth - 40, height: window.innerHeight - 140 });
             } else {
                 maximizeBtn.textContent = '🔍 Max Screen';
-                fCanvas.setDimensions({ width: 600, height: 400 });
+                
+                // If exiting full screen, calculate aspect ratio constraint again to retain shape
+                const currentBg = fCanvas.backgroundImage;
+                if (currentBg) {
+                    const imgRatio = currentBg.height / currentBg.width;
+                    const maxWidth = group.querySelector('.canvas-container').clientWidth || 600;
+                    const dynamicHeight = maxWidth * imgRatio;
+                    fCanvas.setDimensions({ width: maxWidth, height: dynamicHeight });
+                } else {
+                    fCanvas.setDimensions({ width: 600, height: 400 });
+                }
             }
             
             setTimeout(() => {
@@ -168,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 100);
         });
 
-        // Photo Upload Injection Module
+        // Photo Upload Injection Module (Auto-Fit Aspect Ratio to Prevent Cropping)
         if (fileInput) {
             fileInput.addEventListener('change', function(e) {
                 if (!e.target.files || e.target.files.length === 0) return;
@@ -177,12 +175,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = function(f) {
                     const nativeImg = new Image();
                     nativeImg.onload = function() {
+                        
+                        // 1. Calculate aspect ratio based on physical photo
+                        const imgRatio = nativeImg.height / nativeImg.width;
+                        
+                        // 2. Set dynamic height based on the container width
+                        const maxWidth = group.querySelector('.canvas-container').clientWidth || 600;
+                        const dynamicHeight = maxWidth * imgRatio;
+                        
+                        // 3. Resize Fabric workspace grid to encapsulate the entire image shape
+                        fCanvas.setDimensions({ width: maxWidth, height: dynamicHeight });
+
                         const fabricImg = new fabric.Image(nativeImg);
                         const scale = Math.min(fCanvas.width / fabricImg.width, fCanvas.height / fabricImg.height);
+                        
                         fabricImg.set({ 
-                            originX: 'center', originY: 'center', scaleX: scale, scaleY: scale, 
-                            left: fCanvas.width / 2, top: fCanvas.height / 2, selectable: false
+                            originX: 'center', originY: 'center', 
+                            scaleX: scale, scaleY: scale, 
+                            left: fCanvas.width / 2, top: fCanvas.height / 2, 
+                            selectable: false
                         });
+
                         fCanvas.setBackgroundImage(fabricImg, () => {
                             fCanvas.calcOffset();
                             fCanvas.renderAll();
@@ -316,7 +329,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function getSurveyData() {
         const dName = document.getElementById('designerSelect')?.value || "Surveyor";
         const selectedBrand = document.getElementById('brandSelect')?.value || "CO Home Improvements";
-        const profile = designerProfiles[dName] || { phone: "", email: "" };
+        
+        // Data extraction mapping from external window configuration (designers.js)
+        const profiles = window.designerProfiles || {};
+        const logos = window.brandLogos || {};
+        const profile = profiles[dName] || { phone: "", email: "" };
         
         return {
             clientName: document.getElementById('clientName')?.value || 'Customer',
@@ -334,8 +351,10 @@ document.addEventListener('DOMContentLoaded', function() {
             buildingRegs: document.getElementById('buildingRegs')?.value || '',
             sapCalcs: document.getElementById('sapCalcs')?.value || '',
             weepVents: document.getElementById('weepventsExist')?.value || '',
-            designerName: dName, designerPhone: profile.phone, designerEmail: profile.email,
-            logoSource: brandLogos[selectedBrand] || "logo.jpg"
+            designerName: dName, 
+            designerPhone: profile.phone, 
+            designerEmail: profile.email,
+            logoSource: logos[selectedBrand] || "logo.jpg"
         };
     }
 
