@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const { jsPDF } = window.jspdf;
 
     const designerProfiles = {
-        "Tom": { phone: "07700 900000", email: "tom@cohi.co.uk", defaultBrand: "Yorkshire Windows" },
+        "Thomas Oldroyd": { phone: "07949800336", email: "thomasoldroyd@yorkshirewindows.com", defaultBrand: "Yorkshire Windows" },
         "Sobaan": { phone: "07700 900001", email: "sobaan@cohi.co.uk", defaultBrand: "CO Home Improvements" },
         "James": { phone: "07700 900002", email: "james@cohi.co.uk", defaultBrand: "CO Home Improvements" }
     };
