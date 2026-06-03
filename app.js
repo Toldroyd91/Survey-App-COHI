@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 isPinching = true;
                 isPanning = false;
                 fCanvas.isDrawingMode = false; // Safety override to prevent stray lines while zooming
-                
+
                 lastPinchDist = Math.hypot(
                     e.touches[0].clientX - e.touches[1].clientX,
                     e.touches[0].clientY - e.touches[1].clientY
@@ -102,15 +102,15 @@ document.addEventListener('DOMContentLoaded', function() {
         canvasContainer.addEventListener('touchmove', function(e) {
             if (isPinching && e.touches.length === 2) {
                 e.preventDefault(); // Stop website scrolling completely
-                
+
                 let currentDist = Math.hypot(
                     e.touches[0].clientX - e.touches[1].clientX,
                     e.touches[0].clientY - e.touches[1].clientY
                 );
-                
+
                 let zoom = fCanvas.getZoom();
                 zoom *= (currentDist / lastPinchDist); 
-                
+
                 if (zoom > 10) zoom = 10;
                 if (zoom < 0.5) zoom = 0.5;
 
@@ -135,14 +135,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function setButtonState(tool) {
             activeTool = tool;
-            
+
             lockBtn?.classList.toggle('canvas-locked', tool === 'locked');
             if (lockBtn) lockBtn.textContent = (tool === 'locked') ? '🔒 Locked for Scroll & Pan' : '🔓 Canvas Active';
-            
+
             freehandBtn?.classList.toggle('active', tool === 'freehand');
             lineBtn?.classList.toggle('active', tool === 'line');
             textBtn?.classList.toggle('active', tool === 'text');
-            
+
             fCanvas.isDrawingMode = (tool === 'freehand');
             fCanvas.selection = (tool === 'text' || tool === 'locked'); 
             fCanvas.allowTouchScrolling = (tool === 'locked' || tool === 'text');
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fCanvas.discardActiveObject();
             if (tool === 'line') bindLineTool();
             else if (tool === 'text') bindTextTool();
-            
+
             fCanvas.calcOffset();
             fCanvas.renderAll();
         }
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 isDrawingLine = true;
                 const pointer = fCanvas.getPointer(o.e);
                 startX = pointer.x; startY = pointer.y;
-                
+
                 activeLineObj = new fabric.Line([startX, startY, startX, startY], {
                     strokeWidth: 4, stroke: '#FF0000', originX: 'center', originY: 'center', selectable: false, hasControls: false
                 });
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         maximizeBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             const isFull = group.classList.toggle('fullscreen-mode');
-            
+
             // Snap camera zoom back to 100% so users don't get lost in the transition
             fCanvas.setViewportTransform([1,0,0,1,0,0]); 
 
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     fCanvas.setDimensions({ width: 600, height: 400 });
                 }
             }
-            
+
             setTimeout(() => {
                 fCanvas.calcOffset();
                 fCanvas.renderAll();
@@ -268,11 +268,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         const imgRatio = nativeImg.height / nativeImg.width;
                         const maxWidth = group.querySelector('.canvas-container').clientWidth || 600;
                         const dynamicHeight = maxWidth * imgRatio;
-                        
+
                         fCanvas.setDimensions({ width: maxWidth, height: dynamicHeight });
                         const fabricImg = new fabric.Image(nativeImg);
                         const scale = Math.min(fCanvas.width / fabricImg.width, fCanvas.height / fabricImg.height);
-                        
+
                         fabricImg.set({ 
                             originX: 'center', originY: 'center', 
                             scaleX: scale, scaleY: scale, 
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const template = document.getElementById(templateId);
         const mainApp = document.querySelector('main') || document.body.firstElementChild;
-        
+
         template.style.display = 'block';
         template.style.position = 'absolute';
         template.style.top = '0'; template.style.left = '0'; template.style.width = '800px';
@@ -358,19 +358,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const doc = new jsPDF('p', 'mm', 'a4');
             const margin = 10;
             const pdfPrintWidth = doc.internal.pageSize.getWidth() - (margin * 2);
-            
+
             let pages = Array.from(template.querySelectorAll('.pdf-page')).filter(el => window.getComputedStyle(el).display !== 'none');
 
             for(let i = 0; i < pages.length; i++) {
                 btn.innerText = `Printing Page ${i+1}/${pages.length}...`;
-                
+
                 const canvas = await html2canvas(pages[i], {
                     scale: 1.5, useCORS: true, allowTaint: false, windowWidth: 800, logging: false, backgroundColor: '#ffffff'
                 });
-                
+
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
                 const ratio = canvas.height / canvas.width;
-                
+
                 if (i > 0) doc.addPage();
                 doc.addImage(imgData, 'JPEG', margin, margin, pdfPrintWidth, pdfPrintWidth * ratio);
                 canvas.width = 0; canvas.height = 0; 
@@ -411,11 +411,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function getSurveyData() {
         const dName = document.getElementById('designerSelect')?.value || "Surveyor";
         const selectedBrand = document.getElementById('brandSelect')?.value || "CO Home Improvements";
-        
+
         const profiles = window.designerProfiles || {};
         const logos = window.brandLogos || {};
         const profile = profiles[dName] || { phone: "", email: "" };
-        
+
         return {
             clientName: document.getElementById('clientName')?.value || 'Customer',
             clientNum: document.getElementById('clientNum')?.value || '',
@@ -442,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('generateInternalPdfBtn')?.addEventListener('click', async function() {
         const data = getSurveyData();
         const template = document.getElementById('pdfTemplateInternal');
-        
+
         try {
             await applySafeLogo(template, data.logoSource);
 
@@ -450,16 +450,16 @@ document.addEventListener('DOMContentLoaded', function() {
             template.querySelectorAll('.bind-num').forEach(el => el.innerText = data.clientNum);
             template.querySelectorAll('.bind-address').forEach(el => el.innerText = data.address);
             template.querySelectorAll('.bind-date').forEach(el => el.innerText = data.date);
-            
+
             const designerEl = document.getElementById('pdfPrintDesigner');
             if (designerEl) designerEl.innerText = data.designerName;
-            
+
             ['BuildType', 'RoofType', 'ProposedSize', 'FrameColour', 'HouseMaterial', 'DpcDepth', 'FasciaHeight', 'AirBricks', 'BuildingRegs', 'PlanningPerms', 'SapCalcs', 'Budget', 'AccessDifficult', 'AccessWidth', 'WallObstacles', 'DesignerNotes', 'MiscNotes'].forEach(key => {
                 const inputEl = document.getElementById(key.charAt(0).toLowerCase() + key.slice(1));
                 const textEl = document.getElementById(`pdf${key}`);
                 if (inputEl && textEl) textEl.innerText = inputEl.value;
             });
-            
+
             ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
                 const fCanvas = window.appCanvases[id];
                 const imgTag = document.getElementById(`pdfImgInternal-${id}`);
@@ -474,12 +474,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const surname = data.clientName.trim().split(' ').pop() || 'Customer';
         await executeSecurePDFGeneration('pdfTemplateInternal', `${surname}_Internal_Survey.pdf`, this, data);
+
+        // Ping Google Analytics that an Internal PDF was generated
+        if (typeof gtag === 'function') {
+            gtag('event', 'generate_pdf', {
+                'pdf_type': 'Internal Survey',
+                'designer': data.designerName 
+            });
+        }
     });
 
     document.getElementById('generateCustomerPdfBtn')?.addEventListener('click', async function() {
         const data = getSurveyData();
         const template = document.getElementById('pdfTemplateCustomer');
-        
+
         try {
             await applySafeLogo(template, data.logoSource);
 
@@ -531,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (needsPlanning) reqs.push(data.planningPerms);
                     if (needsRegs) reqs.push("Building Regulations");
                     if (needsSap) reqs.push("SAP Calculations");
-                    
+
                     const reqString = reqs.join(', ').replace(/, ([^,]*)$/, ' and $1');
                     complianceEl.innerText = `Regarding compliance, based on our discussion your project will require ${reqString}. Please don't worry about the technicalities of these—I have included a brief explanation of what they mean later in this pack, and our dedicated team will handle all of it for you.`;
                 }
@@ -545,13 +553,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     revisitEl.innerText = `We haven't booked in a date for our next catch-up just yet, but as soon as we work out a time, we will get you scheduled in. If you need anything before I next get in touch, please contact me on the details below.`;
                 }
             }
-            
+
             const nameEl = document.getElementById('lp-designer-name'); if(nameEl) nameEl.innerText = data.designerName;
             const contactEl = document.getElementById('lp-designer-contact'); if(contactEl) contactEl.innerText = `${data.designerPhone} | ${data.designerEmail}`;
-            
+
         } catch (e) { console.warn("Binding bypass:", e); }
 
         const surname = data.clientName.trim().split(' ').pop() || 'Customer';
         await executeSecurePDFGeneration('pdfTemplateCustomer', `${surname}_Design_Consultation.pdf`, this, data);
+
+        // Ping Google Analytics that a complete Customer Pack was generated
+        if (typeof gtag === 'function') {
+            gtag('event', 'generate_pdf', {
+                'pdf_type': 'Customer Pack',
+                'designer': data.designerName 
+            });
+        }
     });
 });
