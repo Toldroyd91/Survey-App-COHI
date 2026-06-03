@@ -205,3 +205,25 @@
       page-break-inside: avoid !important;
       break-inside: avoid !important;
   }
+
+  /* --- POWERHOUSE SURVEYING TOOL STYLES --- */
+  .tool-btn.highlight-btn.active { 
+      background: #ffc107; 
+      color: #000; 
+      border-color: #ffc107; 
+      box-shadow: 0 0 8px rgba(255, 193, 7, 0.6); 
+  }
+  
+  .tool-btn.dim-line-btn.active { 
+      background: #0dcaf0; 
+      color: #000; 
+      border-color: #0dcaf0; 
+      box-shadow: 0 0 8px rgba(13, 202, 240, 0.6); 
+  }
+  
+  .tool-btn.stamp-mh-btn { color: #0D6EFD; border-color: #0D6EFD; }
+  .tool-btn.stamp-svp-btn { color: #8e959b; border-color: #8e959b; }
+  .tool-btn.stamp-tap-btn { color: #0dcaf0; border-color: #0dcaf0; }
+  
+  .tool-btn.undo-btn { background: #3a2e2e; color: #ff9b9b; border-color: #ff9b9b; }
+  .tool-btn.undo-btn:active { background: #ff4d4d; color: white; }
