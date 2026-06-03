@@ -27,8 +27,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // DOM Toolbar Mapping
         const lockBtn = group.querySelector('.lock-btn');
         const freehandBtn = group.querySelector('.freehand-btn');
+        const highlightBtn = group.querySelector('.highlight-btn');
         const lineBtn = group.querySelector('.line-btn');
+        const dimLineBtn = group.querySelector('.dim-line-btn');
         const textBtn = group.querySelector('.text-btn');
+        const stampMhBtn = group.querySelector('.stamp-mh-btn');
+        const stampSvpBtn = group.querySelector('.stamp-svp-btn');
+        const stampTapBtn = group.querySelector('.stamp-tap-btn');
+        const undoBtn = group.querySelector('.undo-btn');
         const maximizeBtn = group.querySelector('.maximize-btn');
         const clearBtn = group.querySelector('.clear-btn');
         const fileInput = group.querySelector('.camera-input');
@@ -128,22 +134,35 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isPinching && e.touches.length < 2) {
                 isPinching = false;
                 // Instantly return the pen tool if they were freehanding before the pinch
-                if (activeTool === 'freehand') fCanvas.isDrawingMode = true; 
+                if (activeTool === 'freehand' || activeTool === 'highlight') fCanvas.isDrawingMode = true; 
             }
         });
         // ==========================================
 
         function setButtonState(tool) {
             activeTool = tool;
+            const currentZoom = fCanvas.getZoom();
 
             lockBtn?.classList.toggle('canvas-locked', tool === 'locked');
             if (lockBtn) lockBtn.textContent = (tool === 'locked') ? '🔒 Locked for Scroll & Pan' : '🔓 Canvas Active';
 
             freehandBtn?.classList.toggle('active', tool === 'freehand');
+            highlightBtn?.classList.toggle('active', tool === 'highlight');
             lineBtn?.classList.toggle('active', tool === 'line');
+            dimLineBtn?.classList.toggle('active', tool === 'dim-line');
             textBtn?.classList.toggle('active', tool === 'text');
 
-            fCanvas.isDrawingMode = (tool === 'freehand');
+            fCanvas.isDrawingMode = (tool === 'freehand' || tool === 'highlight');
+            
+            // Zoom-Aware Thickness Calculation
+            if (tool === 'freehand') {
+                fCanvas.freeDrawingBrush.color = '#FF0000';
+                fCanvas.freeDrawingBrush.width = 4 / currentZoom;
+            } else if (tool === 'highlight') {
+                fCanvas.freeDrawingBrush.color = 'rgba(255, 255, 0, 0.4)';
+                fCanvas.freeDrawingBrush.width = 25 / currentZoom;
+            }
+
             fCanvas.selection = (tool === 'text' || tool === 'locked'); 
             fCanvas.allowTouchScrolling = (tool === 'locked' || tool === 'text');
 
@@ -153,14 +172,16 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             fCanvas.discardActiveObject();
+            
             if (tool === 'line') bindLineTool();
+            else if (tool === 'dim-line') bindDimLineTool();
             else if (tool === 'text') bindTextTool();
 
             fCanvas.calcOffset();
             fCanvas.renderAll();
         }
 
-        // Vector Straight Line Mechanics
+        // Vector Straight Line Mechanics (Zoom Aware)
         function bindLineTool() {
             fCanvas.off('mouse:down'); fCanvas.off('mouse:move'); fCanvas.off('mouse:up');
             fCanvas.on('mouse:down', function(o) {
@@ -168,9 +189,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 isDrawingLine = true;
                 const pointer = fCanvas.getPointer(o.e);
                 startX = pointer.x; startY = pointer.y;
+                const z = fCanvas.getZoom();
 
                 activeLineObj = new fabric.Line([startX, startY, startX, startY], {
-                    strokeWidth: 4, stroke: '#FF0000', originX: 'center', originY: 'center', selectable: false, hasControls: false
+                    strokeWidth: 4 / z, stroke: '#FF0000', originX: 'center', originY: 'center', selectable: false, hasControls: false
                 });
                 fCanvas.add(activeLineObj);
             });
@@ -190,19 +212,62 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // Dimension Line Mechanics (Auto-Arrowheads)
+        function bindDimLineTool() {
+            fCanvas.off('mouse:down'); fCanvas.off('mouse:move'); fCanvas.off('mouse:up');
+            fCanvas.on('mouse:down', function(o) {
+                if (activeTool !== 'dim-line') return;
+                isDrawingLine = true;
+                const pointer = fCanvas.getPointer(o.e);
+                startX = pointer.x; startY = pointer.y;
+                const z = fCanvas.getZoom();
+
+                activeLineObj = new fabric.Line([startX, startY, startX, startY], {
+                    strokeWidth: 3 / z, stroke: '#0D6EFD', strokeDashArray: [5 / z, 5 / z], originX: 'center', originY: 'center', selectable: false, hasControls: false
+                });
+                fCanvas.add(activeLineObj);
+            });
+
+            fCanvas.on('mouse:move', function(o) {
+                if (!isDrawingLine || activeTool !== 'dim-line') return;
+                const pointer = fCanvas.getPointer(o.e);
+                activeLineObj.set({ x2: pointer.x, y2: pointer.y });
+                fCanvas.renderAll();
+            });
+
+            fCanvas.on('mouse:up', function() {
+                if (activeTool !== 'dim-line') return;
+                isDrawingLine = false;
+                if (activeLineObj) {
+                    activeLineObj.setCoords();
+                    const x1 = activeLineObj.x1, y1 = activeLineObj.y1, x2 = activeLineObj.x2, y2 = activeLineObj.y2;
+                    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                    const z = fCanvas.getZoom();
+                    const arrowSize = 12 / z;
+
+                    const arrow1 = new fabric.Triangle({ width: arrowSize, height: arrowSize, fill: '#0D6EFD', left: x1, top: y1, originX: 'center', originY: 'center', angle: angle - 90, selectable: false });
+                    const arrow2 = new fabric.Triangle({ width: arrowSize, height: arrowSize, fill: '#0D6EFD', left: x2, top: y2, originX: 'center', originY: 'center', angle: angle + 90, selectable: false });
+                    
+                    fCanvas.add(arrow1, arrow2);
+                }
+                fCanvas.renderAll();
+            });
+        }
+
         // Vector Measurement Text Mechanics
         function bindTextTool() {
             fCanvas.off('mouse:down'); fCanvas.off('mouse:move'); fCanvas.off('mouse:up');
             fCanvas.on('mouse:down', function(o) {
                 if (activeTool !== 'text') return;
                 const target = fCanvas.findTarget(o.e);
-                if (target && (target.type === 'i-text' || target.type === 'text')) return;
+                if (target && (target.type === 'i-text' || target.type === 'text' || target.type === 'group')) return;
 
                 const pointer = fCanvas.getPointer(o.e);
+                const z = fCanvas.getZoom();
                 const mmText = new fabric.IText('3000 mm', {
-                    left: pointer.x, top: pointer.y, fontFamily: 'system-ui', fontSize: 20,
+                    left: pointer.x, top: pointer.y, fontFamily: 'system-ui', fontSize: 20 / z,
                     fill: '#FFFF00', fontWeight: 'bold', backgroundColor: 'rgba(0,0,0,0.65)',
-                    padding: 6, cornerSize: 8, transparentCorners: false, hasControls: true
+                    padding: 6 / z, cornerSize: 8 / z, transparentCorners: false, hasControls: true
                 });
                 fCanvas.add(mmText);
                 fCanvas.setActiveObject(mmText);
@@ -210,11 +275,55 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // Pre-Fabricated Stamp Engine
+        function addStamp(text, bgColor) {
+            const z = fCanvas.getZoom();
+            const vpt = fCanvas.viewportTransform;
+            const centerX = (fCanvas.width / 2 - vpt[4]) / z;
+            const centerY = (fCanvas.height / 2 - vpt[5]) / z;
+
+            const shape = new fabric.Rect({ width: 50 / z, height: 30 / z, fill: bgColor, originX: 'center', originY: 'center', rx: 4 / z, ry: 4 / z });
+            const label = new fabric.Text(text, { fontSize: 14 / z, fill: '#FFFFFF', fontWeight: 'bold', originX: 'center', originY: 'center', fontFamily: 'system-ui' });
+            
+            const group = new fabric.Group([shape, label], {
+                left: centerX, top: centerY, originX: 'center', originY: 'center', hasControls: true, borderColor: '#FF0000', cornerColor: '#FF0000', cornerSize: 8 / z, transparentCorners: false
+            });
+            
+            fCanvas.add(group);
+            fCanvas.setActiveObject(group);
+            setButtonState('text'); // Automatically switch to text/selection mode so it can be dragged immediately
+        }
+
         // Hook UI Interactive Elements
         lockBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('locked'); });
         freehandBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('freehand'); });
+        highlightBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('highlight'); });
         lineBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('line'); });
+        dimLineBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('dim-line'); });
         textBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('text'); });
+
+        // Hook Stamps
+        stampMhBtn?.addEventListener('click', (e) => { e.preventDefault(); addStamp('MH', '#0D6EFD'); });
+        stampSvpBtn?.addEventListener('click', (e) => { e.preventDefault(); addStamp('PIPE', '#6c757d'); });
+        stampTapBtn?.addEventListener('click', (e) => { e.preventDefault(); addStamp('TAP', '#0dcaf0'); });
+
+        // Undo Last Action
+        undoBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const objects = fCanvas.getObjects();
+            if (objects.length > 0) {
+                // If the last object was a dimension line with arrows, remove all 3 pieces (Line + 2 Triangles)
+                const lastObj = objects[objects.length - 1];
+                if (lastObj.type === 'triangle') {
+                    fCanvas.remove(objects[objects.length - 1]); // Arrow 2
+                    fCanvas.remove(objects[objects.length - 2]); // Arrow 1
+                    fCanvas.remove(objects[objects.length - 3]); // Line
+                } else {
+                    fCanvas.remove(lastObj);
+                }
+                fCanvas.renderAll();
+            }
+        });
 
         // Reset Operations
         clearBtn?.addEventListener('click', (e) => {
@@ -256,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 100);
         });
 
-        // Photo Upload Injection Module (Auto-Fit Aspect Ratio)
+        // Photo Upload Injection Module (Auto-Fit Aspect Ratio & Snap Center)
         if (fileInput) {
             fileInput.addEventListener('change', function(e) {
                 if (!e.target.files || e.target.files.length === 0) return;
@@ -265,6 +374,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = function(f) {
                     const nativeImg = new Image();
                     nativeImg.onload = function() {
+                        // Snap Camera home before rendering image to prevent off-center loading
+                        fCanvas.setViewportTransform([1,0,0,1,0,0]); 
+
                         const imgRatio = nativeImg.height / nativeImg.width;
                         const maxWidth = group.querySelector('.canvas-container').clientWidth || 600;
                         const dynamicHeight = maxWidth * imgRatio;
