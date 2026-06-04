@@ -5,14 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Survey App</title>
     <link rel="stylesheet" href="style.css">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-0J8DC9GD6Z"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
 
-  gtag('config', 'G-0J8DC9GD6Z');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0J8DC9GD6Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-0J8DC9GD6Z');
+    </script>
 
     <style>
         .btn-danger { background: #8b0000; color: white; border: none; }
@@ -64,7 +71,7 @@
 </head>
 <body>
     <header class="navbar navbar--top" style="position: relative; padding: 15px;">
-        <div class="navbar__container" style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <div class="navbar__container" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
             <h1 class="navbar__title" style="margin-right: auto;">Survey App</h1>
             <select id="brandSelect" class="form-group__input form-group__input--touch" style="min-height: 40px; height: 40px; padding: 0 10px; font-size: 0.9rem; width: 200px;">
                 <option value="Clearview">Clearview</option>
@@ -77,10 +84,8 @@
             </select>
             <input list="designerList" id="designerSelect" class="form-group__input form-group__input--touch" style="min-height: 40px; height: 40px; padding: 0 10px; font-size: 0.9rem; width: 160px;" placeholder="Select Designer...">
             <datalist id="designerList">
-                <option value="Tom">
-                <option value="Sobaan">
-                <option value="James">
-            </datalist>
+                </datalist>
+            <button id="openProfileManagerBtn" style="width: auto; height: 40px; margin-top: 0; padding: 0 15px; background: #2D2D2D; border: 1px solid #444; color: #A0A0A0; font-size: 0.9rem;">⚙️ Profile</button>
         </div>
     </header>
 
@@ -108,9 +113,8 @@
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
+                    <button type="button" class="tool-btn pin-1-btn">📍 Pin 1</button>
+                    <button type="button" class="tool-btn pin-2-btn">📍 Pin 2</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
@@ -127,9 +131,8 @@
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
+                    <button type="button" class="tool-btn pin-1-btn">📍 Pin 1</button>
+                    <button type="button" class="tool-btn pin-2-btn">📍 Pin 2</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
@@ -146,9 +149,8 @@
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
+                    <button type="button" class="tool-btn pin-1-btn">📍 Pin 1</button>
+                    <button type="button" class="tool-btn pin-2-btn">📍 Pin 2</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
@@ -158,6 +160,25 @@
 
         <article class="card card--primary">
             <h2 class="card__title">Access & Location Survey</h2>
+            
+            <div class="canvas-group" data-id="masterlayout" style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #333;">
+                <label class="form-group__label" style="color: #0dcaf0; font-size: 1.1rem;">🗺️ Master Site Map (Pin Drops):</label>
+                <p style="font-size: 0.85rem; color: #A0A0A0; margin-bottom: 10px;">Upload a top-down sketch or layout photo and drop numbered pins to mark obstacles.</p>
+                <input type="file" class="camera-input form-group__input" accept="image/*">
+                <div class="canvas-container"><canvas id="canvas-masterlayout" width="600" height="400"></canvas></div>
+                <div class="canvas-controls">
+                    <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
+                    <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
+                    <button type="button" class="tool-btn pin-1-btn" style="color: #0D6EFD; border-color: #0D6EFD;">📍 Pin 1</button>
+                    <button type="button" class="tool-btn pin-2-btn" style="color: #0dcaf0; border-color: #0dcaf0;">📍 Pin 2</button>
+                    <button type="button" class="tool-btn pin-3-btn" style="color: #ffc107; border-color: #ffc107;">📍 Pin 3</button>
+                    <button type="button" class="tool-btn text-btn">📝 Text</button>
+                    <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
+                    <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
+                    <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
+                </div>
+            </div>
+
             <div class="form-group"><label class="form-group__label">Wheelbarrow difficulties?</label><select id="accessDifficult" class="form-group__input"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
             <div class="form-group"><label class="form-group__label">Narrowest access point (mm):</label><input type="number" id="accessWidth" class="form-group__input"></div>
             <div class="form-group"><label class="form-group__label">Upload access photos:</label><input type="file" id="accessPhotos" class="form-group__input" accept="image/*" multiple style="padding-top:13px;"></div>
@@ -171,15 +192,9 @@
                 <div class="canvas-controls">
                     <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
                     <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
-                    <button type="button" class="tool-btn highlight-btn">🖍️ Highlight</button>
-                    <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
-                    <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
                 </div>
             </div>
@@ -192,15 +207,8 @@
                 <div class="canvas-controls">
                     <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
                     <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
-                    <button type="button" class="tool-btn highlight-btn">🖍️ Highlight</button>
-                    <button type="button" class="tool-btn line-btn">📏 Line</button>
-                    <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
-                    <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
                 </div>
             </div>
@@ -213,15 +221,8 @@
                 <div class="canvas-controls">
                     <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
                     <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
-                    <button type="button" class="tool-btn highlight-btn">🖍️ Highlight</button>
-                    <button type="button" class="tool-btn line-btn">📏 Line</button>
-                    <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
-                    <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
                 </div>
             </div>
@@ -234,15 +235,8 @@
                 <div class="canvas-controls">
                     <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
                     <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
-                    <button type="button" class="tool-btn highlight-btn">🖍️ Highlight</button>
-                    <button type="button" class="tool-btn line-btn">📏 Line</button>
-                    <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
-                    <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
                 </div>
             </div>
@@ -257,15 +251,8 @@
                 <div class="canvas-controls">
                     <button type="button" class="tool-btn lock-btn canvas-locked">🔒 Locked for Scroll</button>
                     <button type="button" class="tool-btn freehand-btn">✏️ Freehand</button>
-                    <button type="button" class="tool-btn highlight-btn">🖍️ Highlight</button>
-                    <button type="button" class="tool-btn line-btn">📏 Line</button>
-                    <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
-                    <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear</button>
                 </div>
             </div>
@@ -290,7 +277,16 @@
             <div class="form-group"><label class="form-group__label">Planning Permission Required?</label><select id="planningPerms" class="form-group__input"><option value="">Select...</option><option value="No">No</option><option value="Full Planning">Full Planning</option><option value="Pre Approved Planning">Pre Approved Planning</option></select></div>
             <div class="form-group"><label class="form-group__label">SAP Calcs Required?</label><select id="sapCalcs" class="form-group__input"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
             <div class="form-group"><label class="form-group__label">Budget:</label><input type="text" id="budget" class="form-group__input"></div>
-            <div class="form-group"><label class="form-group__label">Designer Notes:</label><textarea id="designerNotes" class="form-group__input" rows="4"></textarea></div>
+            
+            <div class="form-group">
+                <label class="form-group__label">Designer Notes:</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button type="button" id="dictateBtn" class="tool-btn" style="width: auto; margin-top: 0; background: #e63946; border-color: #e63946; color: white;">🎙️ Dictate</button>
+                    <button type="button" id="aiPolishBtn" class="tool-btn" style="width: auto; margin-top: 0; background: #8338ec; border-color: #8338ec; color: white;">✨ AI Polish</button>
+                </div>
+                <textarea id="designerNotes" class="form-group__input" rows="4" placeholder="Type or dictate rough notes here..."></textarea>
+                <textarea id="polishedNotes" style="display:none;"></textarea>
+            </div>
 
             <div class="canvas-group" data-id="designersketch">
                 <label class="form-group__label" style="color: var(--accent);">Designer Sketches:</label>
@@ -303,9 +299,6 @@
                     <button type="button" class="tool-btn line-btn">📏 Line</button>
                     <button type="button" class="tool-btn dim-line-btn">📐 Dim Line</button>
                     <button type="button" class="tool-btn text-btn">📝 Text</button>
-                    <button type="button" class="tool-btn stamp-mh-btn">Ⓜ️ MH Stamp</button>
-                    <button type="button" class="tool-btn stamp-svp-btn">💧 Pipe Stamp</button>
-                    <button type="button" class="tool-btn stamp-tap-btn">🚰 Tap Stamp</button>
                     <button type="button" class="tool-btn undo-btn">↩️ Undo</button>
                     <button type="button" class="tool-btn maximize-btn">🔍 Max Screen</button>
                     <button type="button" class="tool-btn clear-btn" style="background: #444; color: #fff;">🗑️ Clear Sketch</button>
@@ -332,6 +325,7 @@
                 <img class="brand-logo-img" src="logo.jpg" style="max-height: 90px; margin-bottom: 25px;">
                 <h1 style="color: #0F3759; font-size: 34px; margin: 0 0 10px 0; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Technical Survey Report</h1>
                 <div style="width: 80px; height: 4px; background: #0F3759; margin: 0 auto 30px auto; border-radius: 2px;"></div>
+                <p id="pdfGpsTimestamp" style="font-size: 11px; color: #6c757d; margin-top: 15px; text-transform: uppercase; letter-spacing: 0.5px;"></p>
             </div>
             <div style="width: 100%; border: 1px solid #e1e4e6; border-radius: 6px; overflow: hidden; background: #f8f9fa; margin: 20px auto; padding: 10px; box-sizing: border-box;">
                 <p style="margin: 0 0 8px 0; text-align: left; font-size: 13px; font-weight: bold; color: #0F3759; text-transform: uppercase;">Front Elevation Reference</p>
@@ -382,7 +376,13 @@
                 <span style="font-size: 12px; font-weight: bold; color: #6c757d; text-transform: uppercase;">Technical Drawings & Annotations Log</span>
                 <img class="brand-logo-img" src="logo.jpg" style="max-height: 35px;">
             </div>
+            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 15px;">
+                <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#e9ecef; grid-column: span 2;">
+                    <p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#495057; text-transform:uppercase;">Master Site Map (Pin Drops)</p>
+                    <img id="pdfImgInternal-masterlayout" style="width:100%; border:1px solid #e1e4e6; height: 250px; object-fit: contain; background:#fff;">
+                </div>
+
                 <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#fbeeeb;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#c92a2a; text-transform:uppercase;">House Material</p><img id="pdfImgInternal-housematerialphoto" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
                 <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#fbeeeb;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#c92a2a; text-transform:uppercase;">Manhole / Inspection Chamber</p><img id="pdfImgInternal-manhole" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
                 <div style="border: 1px solid #dee2e6; padding: 8px; border-radius: 4px; background:#fbeeeb;"><p style="margin: 0 0 6px 0; font-weight: bold; font-size: 11px; color:#c92a2a; text-transform:uppercase;">Drainage Weep Vents</p><img id="pdfImgInternal-weepvents" style="width:100%; border:1px solid #e1e4e6; height: 175px; object-fit: contain; background:#fff;"></div>
@@ -410,7 +410,6 @@
     </div>
 
     <div id="pdfTemplateCustomer" style="display: none; background: #ffffff; color: #333333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; width: 800px; padding: 40px; box-sizing: border-box;">
-
         <div class="pdf-page" style="page-break-after: always; text-align: left; padding: 30px 50px; font-size: 15px; line-height: 1.8; color: #333;">
             <div style="text-align: center; margin-bottom: 40px;">
                 <img class="brand-logo-img" src="logo.jpg" style="max-height: 80px; margin-bottom: 25px;">
@@ -422,6 +421,9 @@
             <p id="lp-roof" style="margin-bottom: 25px;"></p>
             <p id="lp-frame" style="margin-bottom: 25px;"></p>
             <p id="lp-compliance" style="margin-bottom: 25px;"></p>
+            
+            <p id="lp-ai-notes" style="margin-bottom: 25px; font-style: italic; color: #495057; display: none;"></p>
+
             <p id="lp-revisit" style="margin-bottom: 40px;"></p>
 
             <p style="margin-bottom: 20px;">Best regards,</p>
@@ -484,13 +486,34 @@
                 </ul>
             </div>
         </div>
+    </div> 
 
-    </div> <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <div id="profileModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2 style="color: #F7F7F7; margin-bottom: 20px;">Manage Designer Profile</h2>
+            <div class="form-group"><label class="form-group__label">Designer Name:</label><input type="text" id="profName" class="form-group__input" placeholder="e.g. Tom"></div>
+            <div class="form-group"><label class="form-group__label">Email Address:</label><input type="email" id="profEmail" class="form-group__input" placeholder="name@yorkshirewindows.com"></div>
+            <div class="form-group"><label class="form-group__label">Phone Number:</label><input type="tel" id="profPhone" class="form-group__input" placeholder="07..."></div>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button id="saveProfileBtn" class="button" style="margin-top: 0;">Save Profile</button>
+                <button id="closeProfileBtn" class="button" style="margin-top: 0; background: #444;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
     <script src="designers.js"></script>
-
     <script src="app.js"></script>
 </body>
 </html>
