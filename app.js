@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handle Form Reset properly with Autosave
     document.getElementById('resetFormBtn')?.addEventListener('click', () => {
         if(confirm("Are you sure you want to clear the entire form for a new appointment?")) {
             localStorage.removeItem('surveyAppData');
@@ -63,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 for (let i = e.resultIndex; i < e.results.length; ++i) {
                     if (e.results[i].isFinal) notesArea.value += e.results[i][0].transcript + '. ';
                 }
-                // Trigger autosave manually after voice input
                 const data = JSON.parse(localStorage.getItem('surveyAppData')) || {};
                 data['designerNotes'] = notesArea.value;
                 localStorage.setItem('surveyAppData', JSON.stringify(data));
@@ -74,11 +72,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 rec.running = !rec.running;
             };
         } else {
-            dictateBtn.style.display = 'none'; // Hide if browser doesn't support it
+            dictateBtn.style.display = 'none'; 
         }
     }
 
-    // --- 4. INTERACTIVE FABRIC VECTOR IMPLEMENTATION (Pinch/Pan/Zoom) ---
+    // --- 4. INTERACTIVE FABRIC VECTOR IMPLEMENTATION ---
     window.appCanvases = {};
     document.querySelectorAll('.canvas-group').forEach(group => {
         const id = group.getAttribute('data-id');
@@ -94,13 +92,11 @@ document.addEventListener('DOMContentLoaded', function() {
         fCanvas.freeDrawingBrush.width = 4;
         window.appCanvases[id] = fCanvas;
 
-        // Vector State Flags
         let activeTool = 'locked'; 
         let isDrawingLine = false;
         let activeLineObj = null;
         let startX = 0; let startY = 0;
 
-        // DOM Toolbar Mapping
         const lockBtn = group.querySelector('.lock-btn');
         const freehandBtn = group.querySelector('.freehand-btn');
         const highlightBtn = group.querySelector('.highlight-btn');
@@ -116,9 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const fileInput = group.querySelector('.camera-input');
         const canvasContainer = group.querySelector('.canvas-container');
 
-        // ==========================================
-        // CAMERA ENGINE: PINCH, ZOOM & PAN
-        // ==========================================
         let isPinching = false;
         let lastPinchDist = 0;
         let isPanning = false;
@@ -208,7 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (activeTool === 'freehand' || activeTool === 'highlight') fCanvas.isDrawingMode = true; 
             }
         });
-        // ==========================================
 
         function setButtonState(tool) {
             activeTool = tool;
@@ -342,7 +334,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // --- NEW HIGH-END PIN ENGINE (Replaces Stamps) ---
         function addPin(num, color) {
             const z = fCanvas.getZoom();
             const vpt = fCanvas.viewportTransform;
@@ -358,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             fCanvas.add(pinGroup);
             fCanvas.setActiveObject(pinGroup);
-            setButtonState('text'); // Switch to selection mode automatically so they can drag it
+            setButtonState('text'); 
         }
 
         lockBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('locked'); });
@@ -368,7 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
         dimLineBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('dim-line'); });
         textBtn?.addEventListener('click', (e) => { e.preventDefault(); setButtonState('text'); });
 
-        // Bind New Pins
         pin1Btn?.addEventListener('click', (e) => { e.preventDefault(); addPin('1', '#0D6EFD'); });
         pin2Btn?.addEventListener('click', (e) => { e.preventDefault(); addPin('2', '#0dcaf0'); });
         pin3Btn?.addEventListener('click', (e) => { e.preventDefault(); addPin('3', '#ffc107'); });
@@ -489,16 +479,44 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadPamphletImage(url) {
         return new Promise((resolve) => {
             const img = new Image();
-            img.crossOrigin = "Anonymous";
             img.onload = function() {
                 const canvas = document.createElement('canvas');
                 canvas.width = img.width; canvas.height = img.height;
                 canvas.getContext('2d').drawImage(img, 0, 0);
                 resolve(canvas.toDataURL('image/jpeg', 0.9));
             };
-            img.onerror = () => resolve(null);
+            img.onerror = () => {
+                console.warn(`Pamphlet missing: ${url}. Skipping...`);
+                resolve(null);
+            };
             img.src = url;
         });
+    }
+
+    // --- PHOTO POPULATION ENGINE ---
+    async function populatePdfImageGrid(inputId, gridId) {
+        const input = document.getElementById(inputId);
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        grid.innerHTML = ''; 
+        if (input && input.files && input.files.length > 0) {
+            for (let i = 0; i < input.files.length; i++) {
+                const file = input.files[i];
+                const dataUrl = await new Promise(res => {
+                    const reader = new FileReader();
+                    reader.onload = e => res(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+                const img = document.createElement('img');
+                img.src = dataUrl;
+                img.style.width = '100%';
+                img.style.maxHeight = '250px';
+                img.style.objectFit = 'contain';
+                img.style.border = '1px solid #dee2e6';
+                img.style.borderRadius = '4px';
+                grid.appendChild(img);
+            }
+        }
     }
 
     // --- PDF GENERATOR ENGINE ---
@@ -519,50 +537,78 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             await new Promise(r => setTimeout(r, 800)); 
-
+            
             const doc = new jsPDF('p', 'mm', 'a4');
             const margin = 10;
             const pdfPrintWidth = doc.internal.pageSize.getWidth() - (margin * 2);
+            const pdfFullWidth = doc.internal.pageSize.getWidth();
+            const pdfFullHeight = doc.internal.pageSize.getHeight();
 
-            let pages = Array.from(template.querySelectorAll('.pdf-page')).filter(el => window.getComputedStyle(el).display !== 'none');
+            if (templateId === 'pdfTemplateInternal') {
+                let pages = Array.from(template.querySelectorAll('.pdf-page')).filter(el => window.getComputedStyle(el).display !== 'none');
 
-            for(let i = 0; i < pages.length; i++) {
-                btn.innerText = `Printing Page ${i+1}/${pages.length}...`;
-
-                const canvas = await html2canvas(pages[i], {
+                for(let i = 0; i < pages.length; i++) {
+                    btn.innerText = `Printing Page ${i+1}/${pages.length}...`;
+                    const canvas = await html2canvas(pages[i], {
+                        scale: 1.5, useCORS: true, allowTaint: false, windowWidth: 800, logging: false, backgroundColor: '#ffffff'
+                    });
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    const ratio = canvas.height / canvas.width;
+                    if (i > 0) doc.addPage();
+                    doc.addImage(imgData, 'JPEG', margin, margin, pdfPrintWidth, pdfPrintWidth * ratio);
+                    canvas.width = 0; canvas.height = 0; 
+                }
+                
+            } else if (templateId === 'pdfTemplateCustomer') {
+                btn.innerText = `Printing Cover Letter...`;
+                
+                // 1. Generate the HTML Cover Letter (Page 1)
+                let pages = Array.from(template.querySelectorAll('.pdf-page')).filter(el => window.getComputedStyle(el).display !== 'none');
+                const canvas = await html2canvas(pages[0], {
                     scale: 1.5, useCORS: true, allowTaint: false, windowWidth: 800, logging: false, backgroundColor: '#ffffff'
                 });
-
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
                 const ratio = canvas.height / canvas.width;
-
-                if (i > 0) doc.addPage();
                 doc.addImage(imgData, 'JPEG', margin, margin, pdfPrintWidth, pdfPrintWidth * ratio);
-                canvas.width = 0; canvas.height = 0; 
-            }
 
-            if (templateId === 'pdfTemplateCustomer') {
-                btn.innerText = "Attaching Pamphlets...";
-                const pdfFullWidth = doc.internal.pageSize.getWidth();
-                const pdfFullHeight = doc.internal.pageSize.getHeight();
+                // 2. Build the exact queue of required JPGs
+                btn.innerText = "Stitching Pamphlets...";
+                
+                const pagesToAppend = [
+                    'pamphlet-who-we-are.jpg',
+                    'pamphlet-why-choose-us.jpg',
+                    'pamphlet-journey.jpg',
+                    'pamphlet-tailored.jpg',
+                    'pamphlet-piling.jpg'
+                ];
 
-                if (data.sapCalcs === 'Yes') {
-                    const sapImg = await loadPamphletImage('sap-pamphlet.jpg');
-                    if (sapImg) { doc.addPage(); doc.addImage(sapImg, 'JPEG', 0, 0, pdfFullWidth, pdfFullHeight); }
-                }
-
+                // Conditional Logic checking exact dropdown values
+                if (data.weepVents === 'Yes') pagesToAppend.push('pamphlet-protecting-home.jpg');
+                
+                if (data.roofType === 'Ultra380') pagesToAppend.push('pamphlet-ultra380.jpg');
+                if (data.roofType === 'LivinRoof') pagesToAppend.push('pamphlet-livinroof.jpg');
+                if (data.roofType === 'Glass Roof') pagesToAppend.push('pamphlet-glass-roof.jpg');
+                if (data.roofType === 'Flat Roof') pagesToAppend.push('pamphlet-flat-roof.jpg');
+                
+                if (data.sapCalcs === 'Yes') pagesToAppend.push('pamphlet-sap-calcs.jpg');
+                
                 if (data.planningPerms === 'Full Planning' || data.planningPerms === 'Pre Approved Planning') {
-                    const planningImg = await loadPamphletImage('planning-pamphlet.jpg');
-                    if (planningImg) { doc.addPage(); doc.addImage(planningImg, 'JPEG', 0, 0, pdfFullWidth, pdfFullHeight); }
+                    pagesToAppend.push('pamphlet-planning.jpg');
                 }
 
-                if (data.buildType === 'Extension' && data.weepVents === 'Yes') {
-                    const cavityImg = await loadPamphletImage('cavity-pamphlet.jpg');
-                    if (cavityImg) { doc.addPage(); doc.addImage(cavityImg, 'JPEG', 0, 0, pdfFullWidth, pdfFullHeight); }
+                // 3. Process the queue sequentially to prevent memory crashes
+                for (const filename of pagesToAppend) {
+                    const img = await loadPamphletImage(filename);
+                    if (img) { 
+                        doc.addPage(); 
+                        doc.addImage(img, 'JPEG', 0, 0, pdfFullWidth, pdfFullHeight); 
+                    }
                 }
             }
-
+            
+            // Output the single master PDF file
             doc.save(fileName);
+
         } catch (error) {
             console.error("CAPTURE FAILED:", error);
             alert("Capture Failed: " + error.message);
@@ -624,6 +670,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const textEl = document.getElementById(`pdf${key}`);
                 if (inputEl && textEl) textEl.innerText = inputEl.value;
             });
+
+            // Extract the Access and Misc Photo grids right before taking the screenshot
+            await populatePdfImageGrid('accessPhotos', 'pdfAccessPhotosGrid');
+            await populatePdfImageGrid('miscPhotos', 'pdfMiscPhotosGrid');
 
             ['frontelevation', 'sideelevation', 'rearelevation', 'housematerialphoto', 'manhole', 'weepvents', 'rwpsvp', 'treelocations', 'designersketch'].forEach(id => {
                 const fCanvas = window.appCanvases[id];
