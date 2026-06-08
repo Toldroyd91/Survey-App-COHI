@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log("[Diagnostics] Blueprint Enterprise Engine Loaded (Offline/Stable).");
-    const { jsPDF } = window.jspdf;
 
-    // --- 0. HIDE SPLASH SCREEN ---
+    // --- 0. HIDE SPLASH SCREEN (Moved to the absolute top!) ---
+    // This now runs instantly, ensuring you never get stuck even if libraries fail.
     setTimeout(() => { 
         const splash = document.getElementById('splashScreen'); 
         if(splash) { 
@@ -11,18 +11,16 @@ document.addEventListener('DOMContentLoaded', function() {
         } 
     }, 1500);
 
-    // --- 1. PROFILE MANAGER ---
-    // ... rest of your code ...
+    // --- 1. SAFEGUARD PDF ENGINE ---
+    // This prevents the app from crashing if the internet drops or loads slowly
+    let jsPDF;
+    if (window.jspdf) {
+        jsPDF = window.jspdf.jsPDF;
+    } else {
+        console.warn("PDF library delayed or offline.");
+    }
 
-    // --- 0. HIDE SPLASH SCREEN ---
-    setTimeout(() => { 
-        const splash = document.getElementById('splashScreen'); 
-        if(splash) { 
-            splash.style.opacity = '0'; 
-            setTimeout(() => splash.style.display = 'none', 600); 
-        } 
-    }, 1000);
-
+    
     // --- 1. DYNAMIC SURVEY UPLOAD LABEL ---
     const updateDynamicLabel = () => {
         const trees = document.getElementById('treesExist')?.value;
