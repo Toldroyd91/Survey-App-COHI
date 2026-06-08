@@ -9,6 +9,18 @@ document.addEventListener('DOMContentLoaded', function() {
             splash.style.opacity = '0'; 
             setTimeout(() => splash.style.display = 'none', 600); 
         } 
+    }, 1500);
+
+    // --- 1. PROFILE MANAGER ---
+    // ... rest of your code ...
+
+    // --- 0. HIDE SPLASH SCREEN ---
+    setTimeout(() => { 
+        const splash = document.getElementById('splashScreen'); 
+        if(splash) { 
+            splash.style.opacity = '0'; 
+            setTimeout(() => splash.style.display = 'none', 600); 
+        } 
     }, 1000);
 
     // --- 1. DYNAMIC SURVEY UPLOAD LABEL ---
